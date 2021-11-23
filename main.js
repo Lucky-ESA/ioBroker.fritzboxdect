@@ -517,7 +517,6 @@ class Fritzboxdect extends utils.Adapter {
             } catch (e) {
                 this.log.error('Parse error: ' + e);
             }
-            if (this.start === 1) sleepT = 8000;
             await this.sleep(this.config.dect_int_sec * 1000);
             this.check = { username: this.config.username, sid: this.xmlvalue.sid };
             await this.Fritzbox("check", this.check);
@@ -638,9 +637,9 @@ class Fritzboxdect extends utils.Adapter {
         *    Orange     #ffa600
         *    Gelb       #ffff00
         *    Gelber
-        *    Grün       #00ff00
-        *    Grüner
-        *    Türkis     #3fe0d0
+        *    GrÃ¼n       #00ff00
+        *    GrÃ¼ner
+        *    TÃ¼rkis     #3fe0d0
         *    Himmelblau #87ceea
         *    Lila       #ed82ed
         *    Pink       #ffbfcc
@@ -652,10 +651,10 @@ class Fritzboxdect extends utils.Adapter {
             "#ffa600"   : {"dect" : 35,  "sat" : [214,140,72], "unm" : [252,252,255], "deb" : ["Orange","Orange hell","Orange heller"] }, /*orange*/
             "#ffff00"   : {"dect" : 52,  "sat" : [153,102,51], "unm" : [255,255,255], "deb" : ["Gelb","Gelb hell","Gelb heller"] }, /*yellow*/
             "#c7ff1f"   : {"dect" : 92,  "sat" : [123, 79,38], "unm" : [248,250,252], "deb" : ["Limette","Limette hell","Limette heller"] }, /*lime*/
-            "#7efc00"   : {"dect" : 92,  "sat" : [123, 79,38], "unm" : [248,250,252], "deb" : ["Grasgrün","Grasgrün hell","Grasgrün heller"] }, /*grasgreen*/
-            "#00ff00"   : {"dect" : 120, "sat" : [160, 82,38], "unm" : [220,232,242], "deb" : ["Grün","Grün hell","Grün heller"] }, /*green*/
-            "#8eed8e"   : {"dect" : 160, "sat" : [145, 84,41], "unm" : [235,242,248], "deb" : ["Hellgrün","Hellgrün hell","Hellgrün heller"] }, /*lightgreen*/
-            "#3fe0d0"   : {"dect" : 160, "sat" : [145, 84,41], "unm" : [235,242,248], "deb" : ["Türkis","Türkis hell","Türkis heller"] }, /*turpuoise*/
+            "#7efc00"   : {"dect" : 92,  "sat" : [123, 79,38], "unm" : [248,250,252], "deb" : ["GrasgrÃ¼n","GrasgrÃ¼n hell","GrasgrÃ¼n heller"] }, /*grasgreen*/
+            "#00ff00"   : {"dect" : 120, "sat" : [160, 82,38], "unm" : [220,232,242], "deb" : ["GrÃ¼n","GrÃ¼n hell","GrÃ¼n heller"] }, /*green*/
+            "#8eed8e"   : {"dect" : 160, "sat" : [145, 84,41], "unm" : [235,242,248], "deb" : ["HellgrÃ¼n","HellgrÃ¼n hell","HellgrÃ¼n heller"] }, /*lightgreen*/
+            "#3fe0d0"   : {"dect" : 160, "sat" : [145, 84,41], "unm" : [235,242,248], "deb" : ["TÃ¼rkis","TÃ¼rkis hell","TÃ¼rkis heller"] }, /*turpuoise*/
             "#333333"   : {"dect" : 195, "sat" : [179,118,59], "unm" : [255,255,255], "deb" : ["Cyan","Cyan hell","Cyan heller"] }, /*cyan*/
             "#add8e5"   : {"dect" : 212, "sat" : [169,110,56], "unm" : [252,252,255], "deb" : ["Hellblau","Hellblau hell","Hellblau heller"] }, /*lightblue*/
             "#87ceea"   : {"dect" : 212, "sat" : [169,110,56], "unm" : [252,252,255], "deb" : ["Himmelblau","Himmelblau hell","Himmelblau heller"] }, /*skyblue*/
@@ -752,7 +751,7 @@ class Fritzboxdect extends utils.Adapter {
                                      read: true,
                                      min: "-30",
                                      max: 255,
-                                     unit: "Â°C"
+                                     unit: "Ã‚Â°C"
                                 },
                                 native: {}
                             };
