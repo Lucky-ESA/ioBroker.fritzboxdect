@@ -1,0 +1,119 @@
+{
+  "common": {
+    "name": "Fritzboxdect",
+    "version": "0.0.1",
+    "news": {
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "zh-cn": "首次出版"
+      }
+    },
+    "title": "Fritzboxdect",
+    "titleLang": {
+      "en": "Fritzboxdect",
+      "de": "Fritzboxdect",
+      "ru": "Fritzboxdect",
+      "pt": "Fritzboxdect",
+      "nl": "Fritzboxdect",
+      "fr": "Fritzboxdect",
+      "it": "Fritzboxdect",
+      "es": "Fritzboxdect",
+      "pl": "Fritzboxdect",
+      "zh-cn": "Fritzboxdect"
+    },
+    "desc": {
+      "en": "Adapter for Fritzboxdect",
+      "de": "Adapter für Fritzboxdect",
+      "ru": "Адаптер для приложений Fritzboxdect",
+      "pt": "Adaptador para aplicativos Fritzboxdect",
+      "nl": "Adapter voor Fritzboxdect",
+      "fr": "Adaptateur pour applications Fritzboxdect",
+      "it": "Adattatore per app Fritzboxdect",
+      "es": "Adaptador para aplicaciones Fritzboxdect",
+      "pl": "Adapter do aplikacji Fritzboxdect",
+      "zh-cn": "Fritzboxdect 应用程序适配器"
+    },
+    "authors": [
+      "Lucky <lucky@luckyskills.de>"
+    ],
+    "keywords": [
+      "Fritzboxdect",
+	  "Fritz",
+	  "DECT"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "dect.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/Lucky-ESA/iobroker.fritzboxdect/main/admin/dect.png",
+    "readme": "https://github.com/Lucky-ESA/iobroker.fritzboxdect/blob/main/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "household",
+    "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "poll",
+    "materialize": true,
+    "dependencies": [
+      {
+        "js-controller": ">=3.0.0"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=4.0.9"
+      }
+    ],
+    "installedFrom": "Lucky-ESA/iobroker.fritzboxdect"
+  },
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ],
+  "native": {
+    "ip": "",
+    "username": "",
+    "password": "",
+    "booster": 5,
+    "open": 5,
+    "dect_int_sec": 2,
+    "dect_int": 10,
+    "temp_int": 20,
+    "ssl": false
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
+}
