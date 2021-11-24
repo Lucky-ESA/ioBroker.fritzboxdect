@@ -142,6 +142,7 @@ class Fritzboxdect extends utils.Adapter {
             .catch((error) => {
                 this.log.error(error);
             });
+        this.log.debug("Data Fritzbox " + resid);
         if (resid) {
             try {
                 parser.parseString(resid, async (err, result) => {
@@ -457,7 +458,7 @@ class Fritzboxdect extends utils.Adapter {
         let bitmask = null;
         let ident   = null;
         let fw_str  = null;
-        let sleepT  = this.config.dect_int_sec;
+        let sleepT  = this.config.dect_int_sec * 1000;
         let isblind = 0;
         if (dectdata.includes('<group')) dectdata = dectdata.replace(/\<group/g, '<device').replace(/\<\/group/g, '</device')
         this.log.debug(JSON.stringify(dectdata));
@@ -519,7 +520,7 @@ class Fritzboxdect extends utils.Adapter {
                 this.log.error('Parse error: ' + e);
             }
             if (this.start === 1) sleepT = 8000;
-            await this.sleep(sleepT * 1000);
+            await this.sleep(sleepT);
             this.check = { username: this.config.username, sid: this.xmlvalue.sid };
             await this.Fritzbox("check", this.check);
 //        this.logout = { logout: "logout", sid: this.xmlvalue.sid };
@@ -881,7 +882,7 @@ class Fritzboxdect extends utils.Adapter {
             }
             this.log.info("Order: " + sendstr);
             if (sendstr !== null) {
-            //    this.Fritzbox("send", strcheck, sendstr);
+                this.Fritzbox("send", strcheck, sendstr);
             }
         } catch (e) {
             this.log.error('Sendcommand: ' + e);
