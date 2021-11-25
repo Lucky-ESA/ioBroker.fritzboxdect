@@ -54,6 +54,9 @@ class Fritzboxdect extends utils.Adapter {
         this.createDP      = new createDP(this);
         this.updateDP      = new updateDP(this);
         this.xmlvalue      = {sid: 'start',  challenge: '', blocktime: '', pbkf2: '', homeauto: false };
+        this.allobjects    = {};
+        this.alltemplates  = {};
+        this.allobjectsid  = null;
 
         if (this.config.password === null || this.config.password === undefined) {
             this.log.error("Password is not set!!");
@@ -126,6 +129,18 @@ class Fritzboxdect extends utils.Adapter {
             },
             native: {},
         })
+
+        await this.setObjectNotExists('DECT_Control.cleanup', {
+            type: "state",
+            common: {
+                name: "Cleanup Object Tree",
+                type: "boolean",
+                role: "button",
+                write: true,
+                read: true,
+            },
+            native: {},
+        })
     }
 
     /**
@@ -186,6 +201,7 @@ class Fritzboxdect extends utils.Adapter {
                                     this.Fritzboxtemplates();
                                     this.updateTemplateInterval = setInterval(async () => {
                                         this.Fritzboxtemplates();
+//                                        this.deleteoldobjects();
                                     }, this.config.temp_int * 60 * 60 * 1000);
                                 }
                             }
@@ -263,23 +279,27 @@ class Fritzboxdect extends utils.Adapter {
     createDataPoint(ident, name, role, type, write) {
         return new Promise(resolve => {
             this.getForeignObject(this.namespace + '.' + ident, async (err, obj) => {
-                this.setObjectNotExistsAsync(ident, {
-                    type: "state",
-                    common: {
-                        name: name,
-                        role: role,
-                        type: type,
-                        write: write,
-                        read: true,
-                    },
-                    native: {},
-                })
-                .then(() => {
-                resolve(true);
-                })
-                .catch((error) => {
-                    this.log.error(error);
-                });
+                if (!obj) {
+                    this.setObjectNotExistsAsync(ident, {
+                        type: "state",
+                        common: {
+                            name: name,
+                            role: role,
+                            type: type,
+                            write: write,
+                            read: true,
+                        },
+                        native: {},
+                    })
+                    .then(() => {
+                    resolve(true);
+                    })
+                    .catch((error) => {
+                        this.log.error(error);
+                    });
+                } else {
+                    resolve(true);
+                }
             });
         });
     }
@@ -292,10 +312,15 @@ class Fritzboxdect extends utils.Adapter {
     insertValue(ident, value) {
         return new Promise(resolve => {
             this.getForeignObject(this.namespace + '.' + ident, async (err, obj) => {
-                this.setStateAsync(ident, {
-                    val: value,
-                    ack: true
-                });
+                if (obj) {
+                    this.setStateAsync(ident, {
+                        val: value,
+                        ack: true
+                    });
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
             });
         });
     }
@@ -321,9 +346,10 @@ class Fritzboxdect extends utils.Adapter {
             return;
         }
         let dectdata = resid.toString("utf-8").trim().replace(/\applymask=/g, 'mask=');
-        let dpname  = null;
-        let ident   = null;
-        let devids  = null;
+        let dpname        = null;
+        let ident         = null;
+        let devids        = null;
+        this.alltemplates = {};
         let db  = null;
         let maskids = null;
         this.log.debug(JSON.stringify(dectdata));
@@ -364,15 +390,9 @@ class Fritzboxdect extends utils.Adapter {
                                 });
                                 result.templatelist.template[key] = maskids;
                             }
-                            await this.createDataPoint('TEMP_' + ident + '.' + key, key, 'info', typeof result.templatelist.template[key], false);
-                            this.getForeignObject(this.namespace + '.TEMP_' + ident + '.' + key, async (err, obj) => {
-                                if (obj) {
-                                    this.setStateAsync('TEMP_' + ident + '.' + key, {
-                                        val: result.templatelist.template[key],
-                                        ack: true
-                                    });
-                                }
-                            });
+                            this.alltemplates[ident] = true;
+                            db = await this.createDataPoint('TEMP_' + ident + '.' + key, key, 'info', typeof result.templatelist.template[key], false);
+                            db = await this.insertValue('TEMP_' + ident + '.' + key, result.templatelist.template[key]);
                         });
                     } else {
                         Object.keys(result.templatelist.template).forEach(async (n) => {
@@ -412,8 +432,9 @@ class Fritzboxdect extends utils.Adapter {
                                     });
                                     result.templatelist.template[n][key] = maskids;
                                 }
-                                db = this.createDataPoint('TEMP_' + ident + '.' + key, key, 'info', typeof result.templatelist.template[n][key], false);
-                                db = this.insertValue('TEMP_' + ident + '.' + key, result.templatelist.template[n][key])
+                                this.alltemplates[ident] = true;
+                                db = await this.createDataPoint('TEMP_' + ident + '.' + key, key, 'info', typeof result.templatelist.template[n][key], false);
+                                db = await this.insertValue('TEMP_' + ident + '.' + key, result.templatelist.template[n][key]);
                             });
                         });
                     }
@@ -488,7 +509,9 @@ class Fritzboxdect extends utils.Adapter {
                                 if (this.start === 1) {
                                     this.createDP.parse(isblind, result.devicelist.device, 'DECT_' + ident, result.devicelist.device);
                                 } else {
-                                    this.updateDP.parse(isblind, this.strcheck.device, 'DECT_' + ident, result.devicelist.device);
+                                    if (this.allobjects['DECT_' + ident]) {
+                                        this.updateDP.parse(this.allobjectsid, isblind, this.strcheck.device, 'DECT_' + ident, result.devicelist.device);
+                                    }
                                 }
                             }
                         } else {
@@ -507,7 +530,9 @@ class Fritzboxdect extends utils.Adapter {
                                     if (this.start === 1) {
                                         this.createDP.parse(isblind, result.devicelist.device[n], 'DECT_' + ident, result.devicelist.device[n]);
                                     } else {
-                                        this.updateDP.parse(isblind, this.strcheck.device[n], 'DECT_' + ident, result.devicelist.device[n]);
+                                        if (this.allobjects['DECT_' + ident]) {
+                                            this.updateDP.parse(this.allobjectsid, isblind, this.strcheck.device[n], 'DECT_' + ident, result.devicelist.device[n]);
+                                        }
                                     }
                                 }
                             });
@@ -519,12 +544,63 @@ class Fritzboxdect extends utils.Adapter {
             } catch (e) {
                 this.log.error('Parse error: ' + e);
             }
-            if (this.start === 1) sleepT = 8000;
+            if (this.start === 1) sleepT = 5000;
             await this.sleep(sleepT);
+            this.startreadallobjects();
             this.check = { username: this.config.username, sid: this.xmlvalue.sid };
-            await this.Fritzbox("check", this.check);
+            this.Fritzbox("check", this.check);
 //        this.logout = { logout: "logout", sid: this.xmlvalue.sid };
 //        this.Fritzbox("logout", this.logout);
+        }
+    }
+
+    /**
+     * startreadallobjects! Read object tree start
+     */
+    async startreadallobjects() {
+        await this.sleep(5000);
+        this.allobjectsid = await this.readallobjects();
+    }
+
+    /**
+     * readallobjects! Read object tree
+     */
+    readallobjects() {
+        this.allobjectsid = '';
+        let ids = '';
+        return new Promise(resolve => {
+            this.getForeignObjects('test.0.*',(err, obj) => {
+                if (err) {
+                    this.log.debug("Read Object: " + err);
+                    resolve(this.allobjectsid);
+                } else {
+                    Object.keys(obj).forEach((key) => {
+                        ids += key + "|";
+                        key = key.split(".")[2];
+                        this.allobjects[key] = true;
+                    });
+                    resolve(ids);
+                }
+            });
+        });
+    }
+
+    /**
+     * deleteoldobjects! Delete old channels
+     */
+    deleteoldobjects() {
+        if ((this.allobjects) && (this.strcheck)) {
+            let searchStr = '';
+            const isStr   = JSON.stringify(this.strcheck).toString().replace(/\s/g, '') + JSON.stringify(this.alltemplates);
+            Object.keys(this.allobjects).forEach((key) => {
+                searchStr = key.replace(/\DECT_/g, '').replace(/\TEMP_/g, '');
+                if (isStr.includes(searchStr) || key === "DECT_Control") {
+                    this.log.info("This folder will not be deleted: " + key);
+                } else {
+                    this.log.warn("This folder will be deleted: " + key);
+                    this.delForeignObject(key);
+                }
+            });
         }
     }
 
@@ -717,6 +793,10 @@ class Fritzboxdect extends utils.Adapter {
             this.log.info("device: " + device);
 
             switch (lastsplit) {
+                case "tsoll":
+                    this.delForeignObject(key);
+                    break;
+
                 case "tsoll":
                     if (state.val > 7 && state.val < 32) dummy = state.val * 2;
                     else if (state.val === 254) dummy = 254;
