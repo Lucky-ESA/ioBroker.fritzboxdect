@@ -19,6 +19,7 @@ const qs         = require("qs");
 const encodeurl  = require("encodeurl");
 const createDP   = require("./lib/createDP");
 const updateDP   = require("./lib/updateDP");
+const getlist    = require("./lib/getlist");
 const fs         = require('fs');
 const https      = require('https');
 const httpsAgent = new https.Agent({
@@ -53,6 +54,7 @@ class Fritzboxdect extends utils.Adapter {
         this.start         = null;
         this.createDP      = new createDP(this);
         this.updateDP      = new updateDP(this);
+        this.getlist       = new getlist(this);
         this.xmlvalue      = {sid: 'start',  challenge: '', blocktime: '', pbkf2: '', homeauto: false };
         this.allobjects    = {};
         this.alltemplates  = {};
@@ -110,6 +112,18 @@ class Fritzboxdect extends utils.Adapter {
             type: "state",
             common: {
                 name: "startulesubscription",
+                type: "boolean",
+                role: "button",
+                write: true,
+                read: true,
+            },
+            native: {},
+        })
+
+        await this.setObjectNotExists('DECT_Control.getsubscriptionstate', {
+            type: "state",
+            common: {
+                name: "getsubscriptionstate",
                 type: "boolean",
                 role: "button",
                 write: true,
@@ -276,7 +290,7 @@ class Fritzboxdect extends utils.Adapter {
      * @param ident DataPoint ID
      * @param name DataPoint Name
      */
-    createDataPoint(ident, name, role, type, write) {
+    createDataPoint(ident, name, role, type, write, value) {
         return new Promise(resolve => {
             this.getForeignObject(this.namespace + '.' + ident, async (err, obj) => {
                 if (!obj) {
@@ -292,12 +306,20 @@ class Fritzboxdect extends utils.Adapter {
                         native: {},
                     })
                     .then(() => {
+                    this.setStateAsync(ident, {
+                        val: value,
+                        ack: true
+                    });
                     resolve(true);
                     })
                     .catch((error) => {
                         this.log.error(error);
                     });
                 } else {
+                    this.setStateAsync(ident, {
+                        val: value,
+                        ack: true
+                    });
                     resolve(true);
                 }
             });
@@ -404,6 +426,7 @@ class Fritzboxdect extends utils.Adapter {
                             dpname = result.templatelist.template[n].name;
                             db = this.createFolder('TEMP_' + ident, dpname);
                             db = this.createDataPoint('TEMP_' + ident + '.toogle', 'Toogle aktivieren/deaktivieren', 'button', 'boolean', true);
+                            this.alltemplates[ident] = true;
                             Object.keys(result.templatelist.template[n]).forEach( async (key) => {
                                 if (key === "devices") {
                                     Object.keys(result.templatelist.template[n][key]).forEach( async (dev) => {
@@ -432,9 +455,7 @@ class Fritzboxdect extends utils.Adapter {
                                     });
                                     result.templatelist.template[n][key] = maskids;
                                 }
-                                this.alltemplates[ident] = true;
-                                db = await this.createDataPoint('TEMP_' + ident + '.' + key, key, 'info', typeof result.templatelist.template[n][key], false);
-                                db = await this.insertValue('TEMP_' + ident + '.' + key, result.templatelist.template[n][key]);
+                                db = await this.createDataPoint('TEMP_' + ident + '.' + key, key, 'info', typeof result.templatelist.template[n][key], false, result.templatelist.template[n][key]);
                             });
                         });
                     }
@@ -765,6 +786,181 @@ class Fritzboxdect extends utils.Adapter {
         }
     }
 
+    /**
+     * readsubscriptionstate
+     */
+    async readsubscriptionstate() {
+        this.log.info("Load subscription state");
+        if (this.xmlvalue.sid === "0000000000000000") {
+            this.setState("info.connection", false, true);
+            this.log.error("Missing SID!! - readsubscriptionstate: " + this.xmlvalue.sid);
+            this.Fritzbox("start", this.name);
+            return;
+        }
+        const resid = await this.requestClient
+            .get(this.config.ip + '/webservices/homeautoswitch.lua?switchcmd=getsubscriptionstate&sid=' + this.xmlvalue.sid)
+            .then((res) => res)
+            .catch((error) => {
+                this.log.error("GET readsubscriptionstate: " + error);
+            });
+
+        if (resid.status !== 200) {
+            this.log.error('readsubscriptionstate: Response from Fritzbox: ' + resid.status);
+            await this.sleep(10000);
+            this.Fritzbox("start", this.name);
+            return;
+        } else if (resid.data === undefined) {
+            this.log.error('readsubscriptionstate: Date from Fritzbox are undefined!!');
+            await this.sleep(10000);
+            this.Fritzbox("start", this.name);
+            return;
+        }
+
+        let dectdata = resid.data.toString("utf-8").trim();
+        this.log.debug(JSON.stringify(dectdata));
+        if (this.isXMLString(dectdata) && (dectdata !== null || dectdata !== undefined)) {
+            try {
+                parser.parseString(dectdata, async (err, result) => {
+                   this.log.debug(JSON.stringify(result.state.code) + "-" + result.state.latestain);
+                    await this.setObjectNotExistsAsync('DECT_Control.DECT', {
+                        type: "channel",
+                        common: {
+                            name: "DECT connect state",
+                            role: "state",
+                        },
+                        native: {},
+                    });
+
+                    await this.setObjectNotExists('DECT_Control.DECT.state', {
+                        type: "state",
+                        common: {
+                            name: "startulesubscription",
+                            type: "number",
+                            role: "info",
+                            write: false,
+                            read: true,
+                            states: {
+                                "0": "Anmeldung läuft nicht",
+                                "1": "Anmeldung läuft",
+                                "2": "timeout",
+                                "3": "sonstiger Error Unterknoten"
+                            }
+                        },
+                        native: {},
+                    })
+
+                    await this.setObjectNotExists('DECT_Control.DECT.latestain', {
+                        type: "state",
+                        common: {
+                            name: "Latest AIN",
+                            type: "string",
+                            role: "info",
+                            write: false,
+                            read: true
+                        },
+                        native: {},
+                    })
+                    this.insertValue('DECT_Control.DECT.state', result.state.state);
+                    this.insertValue('DECT_Control.DECT.latestain', result.state.latestain);
+                });
+            } catch (e) {
+                this.log.error('Parse error: ' + e);
+            }
+        }
+    }
+
+    /**
+     * loadvalues!
+     * @param id - Object
+     * @param cmd - Value for switchcmd
+     */
+    async loadvalues(tem, id, cmd) {
+        if (this.xmlvalue.sid === "0000000000000000") {
+            this.setState("info.connection", false, true);
+            this.log.error("Missing SID!! - loadvalues: " + this.xmlvalue.sid);
+            this.Fritzbox("start", this.name);
+            return;
+        }
+        const resid = await this.requestClient
+            .get(this.config.ip + '/webservices/homeautoswitch.lua?switchcmd=' + cmd + '&sid=' + this.xmlvalue.sid)
+            .then((res) => res)
+            .catch((error) => {
+                this.log.error("GET loadvalues: " + error);
+            });
+
+        if (resid.status !== 200) {
+            this.log.error('loadvalues: Response from Fritzbox: ' + resid.status);
+            await this.sleep(10000);
+            this.Fritzbox("start", this.name);
+            return;
+        } else if (resid.data === undefined) {
+            this.log.error('loadvalues: Date from Fritzbox are undefined!!');
+            await this.sleep(10000);
+            this.Fritzbox("start", this.name);
+            return;
+        }
+        let dectdata = resid.data.toString("utf-8").trim();
+        let folder     = '';
+        let foldername = '';
+        let counter    = '';
+        let colorname  = {};
+        this.log.debug("temp: " + JSON.stringify(dectdata));
+        if (this.isXMLString(dectdata) && (dectdata !== null || dectdata !== undefined)) {
+            try {
+                parser.parseString(dectdata, (err, result) => {
+                    if (tem === 1) {
+                        result = JSON.parse(JSON.stringify(result.devicestats.temperature).replace(/\_/g, 'value'));
+                        this.getlist.parse(id + ".temperatur", result);
+                    } else if (tem === 0) {
+                        dectdata = JSON.parse(JSON.stringify(result.devicestats.voltage).replace(/\_/g, 'value'));
+                        this.getlist.parse(id + ".voltage", dectdata.stats);
+                        dectdata = JSON.parse(JSON.stringify(result.devicestats.power).replace(/\_/g, 'value'));
+                        this.getlist.parse(id + ".power", dectdata.stats);
+                        dectdata = JSON.stringify(result.devicestats.energy).replace(/_/, 'wh');
+                        dectdata = JSON.parse(dectdata.replace(/_/, 'watt'));
+                        for(const val of dectdata.stats) {
+                            ++counter;
+                            if (counter === 1) folder = "watt";
+                            if (counter === 2) folder = "wh";
+                            this.getlist.parse(id + ".energy." + folder, val);
+                        }
+                   } else if (tem === 2) {
+                        Object.keys(result.colordefaults.hsdefaults.hs).forEach((n) => {
+                             Object.keys(result.colordefaults.hsdefaults.hs[n]).forEach((k) => {
+                                  if (k === "hue_index") folder = k + result.colordefaults.hsdefaults.hs[n][k];
+                                  if (k === "name") {
+                                       foldername = result.colordefaults.hsdefaults.hs[n][k]._;
+                                       this.createFolder(id + "." + folder, foldername);
+                                  }
+                                  if (Array.isArray(result.colordefaults.hsdefaults.hs[n][k])) {
+                                       for(const val of result.colordefaults.hsdefaults.hs[n][k]) {
+                                            this.getlist.parse(id + "." + folder + ".sat_index" + val.sat_index, val);
+                                       }
+                                  }
+                             });
+                        });
+                        if (Array.isArray(result.colordefaults.temperaturedefaults.temp)) {
+                             for(const val of result.colordefaults.temperaturedefaults.temp) {
+ 		                    if (val.value === "6500") colorname.tageslicht_3 = 6500;
+		                    else if (val.value === "5900") colorname.tageslicht_2 = 5900;
+		                    else if (val.value === "5300") colorname.tageslicht_1 = 5300;
+		                    else if (val.value === "4700") colorname.neutral_3 = 4700;
+		                    else if (val.value === "4200") colorname.neutral_2 = 4200;
+		                    else if (val.value === "3800") colorname.neutral_1 = 3800;
+		                    else if (val.value === "3400") colorname.warmweiss_3 = 3400;
+		                    else if (val.value === "3000") colorname.warmweiss_2 = 3000;
+                                  else colorname.warmweiss_1 = 2700;
+                             }
+                             this.getlist.parse(id + ".temperature", colorname);
+                        }
+                   }
+                   this.log.debug("Loadvalues: " + JSON.stringify(result));
+                });
+            } catch (e) {
+                this.log.error('Parse error: ' + e);
+            }
+        }
+    }
 
     /**
      * Is async for onStateChange
@@ -793,10 +989,18 @@ class Fritzboxdect extends utils.Adapter {
             this.log.info("device: " + device);
 
             switch (lastsplit) {
-                case "tsoll":
-                    this.delForeignObject(key);
+                case "loadpowerstatic":
+                    this.loadvalues(0, device + '.devicestats', 'getbasicdevicestats&ain=' + deviceId);
+                    return;
                     break;
-
+                case "loadtempstatic":
+                    this.loadvalues(1, device + '.devicestats', 'getbasicdevicestats&ain=' + deviceId);
+                    return;
+                    break;
+                case "loadcolor":
+                    this.loadvalues(2, device + '.devicecolor', 'getcolordefaults&ain=' + deviceId);
+                    return;
+                    break;
                 case "tsoll":
                     if (state.val > 7 && state.val < 32) dummy = state.val * 2;
                     else if (state.val === 254) dummy = 254;
@@ -908,9 +1112,6 @@ class Fritzboxdect extends utils.Adapter {
                         this.setObject(device, obj);
                     }
                     break;
-                case "startulesubscription":
-                    sendstr = '&switchcmd=startulesubscription';
-                    break;
                 case "sendorder":
                     sendstr = state.val;
                     break;
@@ -976,6 +1177,21 @@ class Fritzboxdect extends utils.Adapter {
      */
     onStateChange(id, state) {
         if (state && !state.ack) {
+            const lastsplit   = id.split('.')[id.split('.').length-1];
+            const device      = id.split(".")[2];
+            const strcheck    = { username: this.config.username, sid: this.xmlvalue.sid };
+            if (lastsplit === "getsubscriptionstate") {
+                this.readsubscriptionstate();
+                return;
+            }
+            if (lastsplit === "cleanup") {
+                this.deleteoldobjects();
+                return;
+            }
+            if (lastsplit === "startulesubscription") {
+                this.Fritzbox("send", strcheck, '&switchcmd=startulesubscription');
+                return;
+            }
             this.sendcommand(id, state);
         }
     }
