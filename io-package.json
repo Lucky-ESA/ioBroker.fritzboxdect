@@ -46,8 +46,8 @@
     ],
     "keywords": [
       "Fritzboxdect",
-	  "Fritz",
-	  "DECT"
+      "Fritz",
+      "DECT"
     ],
     "license": "MIT",
     "platform": "Javascript/Node.js",
@@ -73,7 +73,7 @@
         "admin": ">=4.0.9"
       }
     ],
-    "installedFrom": "Lucky-ESA/iobroker.fritzboxdect"
+    "installedFrom": "Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f"
   },
   "encryptedNative": [
     "password"

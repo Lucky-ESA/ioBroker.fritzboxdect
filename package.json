@@ -1,5 +1,5 @@
 {
-  "_from": "github:Lucky-ESA/iobroker.fritzboxdect",
+  "_from": "github:Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f",
   "_id": "iobroker.fritzboxdect@0.0.1",
   "_inBundle": false,
   "_integrity": "",
@@ -9,18 +9,18 @@
   },
   "_requested": {
     "type": "git",
-    "raw": "Lucky-ESA/iobroker.fritzboxdect",
-    "rawSpec": "Lucky-ESA/iobroker.fritzboxdect",
-    "saveSpec": "github:Lucky-ESA/iobroker.fritzboxdect",
+    "raw": "Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f",
+    "rawSpec": "Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f",
+    "saveSpec": "github:Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f",
     "fetchSpec": null,
-    "gitCommittish": ""
+    "gitCommittish": "9b26569cdcab4eb4558c06f8dc51d154cedff24f"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "github:Lucky-ESA/iobroker.fritzboxdect",
-  "_spec": "Lucky-ESA/iobroker.fritzboxdect",
+  "_resolved": "github:Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f",
+  "_spec": "Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f",
   "_where": "/opt/iobroker",
   "author": {
     "name": "Lucky-ESA",

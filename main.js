@@ -1003,17 +1003,25 @@ class Fritzboxdect extends utils.Adapter {
                     break;
                 case "tsoll":
                     if (state.val > 7 && state.val < 32) dummy = state.val * 2;
-                    else if (state.val === 254) dummy = 254;
-                    else if (state.val === 253) dummy = 253;
+                    else if (state.val === 254 || state.val === 2) dummy = 254;
+                    else if (state.val === 0) {
+                        const nexttemp = await this.getStateAsync(this.namespace + "." + device + ".hkr.nextchange.tchange");
+                        const absenk   = await this.getStateAsync(this.namespace + "." + device + ".hkr.absenk");
+                        const komfort  = await this.getStateAsync(this.namespace + "." + device + ".hkr.komfort");
+                        if (nexttemp.val === absenk.val) dummy = komfort.val * 2;
+                        else if (nexttemp.val === komfort.val) dummy = absenk.val * 2;
+                        else dummy = absenk.val * 2;
+                    } else if (state.val === 253 || state.val === 1) dummy = 253;
                     else if (typeof state.val === "string") {
-                        if (state.val === "true" || state.val.toLowerCase() === "on") dummy = 254;
-                        else if (state.val === "false" || state.val.toLowerCase() === "off") dummy = 253;
+                        if (state.val === "true" || state.val.toLowerCase() === "on" || state.val.toLowerCase() === "open") dummy = 254;
+                        else if (state.val === "false" || state.val.toLowerCase() === "off" || state.val.toLowerCase() === "closed") dummy = 253;
                         com = true;
                     } else if (typeof state.val === "boolean") {
                         if (state.val) dummy = 254;
                         else if (state.val === false) dummy = 253;
                         com = true;
                     }
+                    this.log.debug("dummy: " + dummy);
                     if (dummy > 0) {
                         if (com) {
                             obj = {
@@ -1062,6 +1070,11 @@ class Fritzboxdect extends utils.Adapter {
                 case "huealexa":
                     dummy = this.colors(state.val);
                     sendstr = 'ain=' + deviceId + '&switchcmd=setcolor&hue=' + dummy[0] + '&saturation=' + dummy[1] + '&duration=100';
+                    break;
+
+                case "hue":
+                    const sat = await this.getStateAsync(this.namespace + "." + device + ".colorcontrol.saturation");
+                    sendstr = 'ain=' + deviceId + '&switchcmd=setcolor&hue=' + state.val + '&saturation=' + sat + '&duration=100';
                     break;
                 case "level":
                     if (state.val >= 0 && state.val <= 255) sendstr = 'ain=' + deviceId + '&switchcmd=setlevel&level=' + state.val;

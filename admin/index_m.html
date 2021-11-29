@@ -19,13 +19,13 @@
             // This will be called by the admin adapter when the settings page loads
             function load(settings, onChange) {
                 // example: select elements with id=key and class=value and insert value
+                if (!settings) return;
                 if (settings.booster === undefined) settings.booster = 5;
                 if (settings.open === undefined) settings.open = 5;
                 if (settings.dect_int_sec === undefined) settings.dect_int_sec = 2;
                 if (settings.dect_int === undefined) settings.dect_int = 10;
                 if (settings.temp_int === undefined) settings.temp_int = 24;
                 if (settings.ssl === undefined) settings.ssl = false;
-                if (!settings) return;
                 $(".value").each(function () {
                     var $key = $(this);
                     var id = $key.attr("id");
@@ -96,31 +96,31 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col s2 input-field">
+                <div class="col s4 input-field">
                     <input type="number" class="value" id="dect_int" />
                     <label for="dect_int_sec" class="translate">DECT Interval</label>
                 </div>
             </div>
             <div class="row">
-                <div class="col s2 input-field">
+                <div class="col s4 input-field">
                     <input type="number" class="value" id="dect_int" />
                     <label for="dect_int" class="translate">DECT Interval ALL</label>
                 </div>
             </div>
             <div class="row">
-                <div class="col s2 input-field">
+                <div class="col s4 input-field">
                     <input type="number" class="value" id="temp_int" />
                     <label for="temp_int" class="translate">TEMP Interval</label>
                 </div>
             </div>
             <div class="row">
-                <div class="col s2 input-field">
+                <div class="col s4 input-field">
                     <input type="number" class="value" id="booster" />
                     <label for="booster" class="translate">Booster minutes</label>
                 </div>
             </div>
             <div class="row">
-                <div class="col s2 input-field">
+                <div class="col s4 input-field">
                     <input type="number" class="value" id="open" />
                     <label for="open" class="translate">Open minutes</label>
                 </div>
