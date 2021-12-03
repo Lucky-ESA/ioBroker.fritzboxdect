@@ -92,6 +92,11 @@ class Fritzboxdect extends utils.Adapter {
         this.updateInterval = setInterval(async () => {
             this.start = null;
         }, this.config.dect_int * 60 * 1000);
+        this.sidcheck = setInterval(async () => {
+            this.check = { username: this.config.username, sid: this.xmlvalue.sid };
+            this.Fritzbox("check", this.check);
+            this.log.debug("SID Check: " + this.xmlvalue.sid);
+        }, 15 * 60000);
     }
 
     /**
@@ -574,9 +579,7 @@ class Fritzboxdect extends utils.Adapter {
             }
             if (this.start === 1) sleepT = 5000;
             await this.sleep(sleepT);
-            this.startreadallobjects();
-            this.check = { username: this.config.username, sid: this.xmlvalue.sid };
-            this.Fritzbox("check", this.check);
+            if (this.start === 1) this.startreadallobjects();
             if (this.config.extendForeign) {
                 try {
                     await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {native: {extendForeign: false}});
@@ -584,6 +587,7 @@ class Fritzboxdect extends utils.Adapter {
                     this.log.error("Could not set extendForeign: " + e.message);
                 }
             }
+            this.Fritzboxdevice();
 //        this.logout = { logout: "logout", sid: this.xmlvalue.sid };
 //        this.Fritzbox("logout", this.logout);
         }
@@ -593,7 +597,6 @@ class Fritzboxdect extends utils.Adapter {
      * startreadallobjects! Read object tree start
      */
     async startreadallobjects() {
-        await this.sleep(5000);
         this.allobjectsid = await this.readallobjects();
     }
 
@@ -657,7 +660,16 @@ class Fritzboxdect extends utils.Adapter {
                 this.log.error("GET SEND: " + error);
             });
         try {
-            this.log.info("Send: " + resid); //Wenn 1 dann OK
+            if (resid.status !== 200) {
+                this.log.error('Fritzboxsend: Response from Fritzbox: ' + resid.status);
+                this.Fritzbox("start", this.name, sendvalue);
+                return;
+            } else if (resid.data === undefined) {
+                this.log.error('Fritzboxsend: Date from Fritzbox are undefined!!');
+                this.Fritzbox("start", this.name, sendvalue);
+                return;
+            }
+            this.log.info("Send: " + resid.data); //Wenn 1 dann OK
         } catch (e) {
             this.log.error('Send error: ' + e);
         }
@@ -794,6 +806,7 @@ class Fritzboxdect extends utils.Adapter {
         try {
             clearInterval(this.updateInterval);
             clearInterval(this.updateTemplateInterval);
+            clearInterval(sidcheck);
             callback();
         } catch (e) {
             callback();
@@ -1003,11 +1016,11 @@ class Fritzboxdect extends utils.Adapter {
                 return;
             }
 
-            this.log.info("SID: " + this.xmlvalue.sid);
-            this.log.info("Folder: " + folder);
-            this.log.info("Value: " + state.val);
-            this.log.info("deviceId: " + deviceId);
-            this.log.info("device: " + device);
+            this.log.debug("SID: " + this.xmlvalue.sid);
+            this.log.debug("Folder: " + folder);
+            this.log.debug("Value: " + state.val);
+            this.log.debug("deviceId: " + deviceId);
+            this.log.debug("device: " + device);
             if (lastsplit === "alexapower" ||
                 lastsplit === "alexamode" ||
                 lastsplit === "alexaparty" ||
@@ -1230,7 +1243,7 @@ class Fritzboxdect extends utils.Adapter {
             }
             this.log.info("command: " + sendstr);
             if (sendstr !== null) {
-                this.Fritzbox("send", strcheck, sendstr);
+                this.Fritzboxsend(sendstr);
             }
         } catch (e) {
             this.log.error('Sendcommand: ' + e);
