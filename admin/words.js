@@ -134,4 +134,16 @@ systemDictionary = {
         pl: "Certyfikat Fritzbox",
         "zh-cn": "Fritzbox 证书",
     },
+    "Update Objects": {
+    "en": "Update Fritzbox objects (once)",
+    "de": "Fritzbox-Objekte aktualisieren (einmal)",
+    "ru": "Обновить объекты Fritzbox (один раз)",
+    "pt": "Atualizar objetos Fritzbox (uma vez)",
+    "nl": "Fritzbox-objecten bijwerken (eenmalig)",
+    "fr": "Mettre à jour les objets Fritzbox (une fois)",
+    "it": "Aggiorna oggetti Fritzbox (una volta)",
+    "es": "Actualizar objetos Fritzbox (una vez)",
+    "pl": "Aktualizuj obiekty Fritzbox (jednorazowo)",
+    "zh-cn": "更新 Fritzbox 对象（一次）"
+    },
 };

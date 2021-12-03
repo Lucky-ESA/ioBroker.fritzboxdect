@@ -104,6 +104,7 @@ class Fritzboxdect extends utils.Adapter {
             common: {
                 name: "DECT Control",
                 role: "state",
+                icon: "/icons/control.png",
             },
             native: {},
         });
@@ -263,16 +264,18 @@ class Fritzboxdect extends utils.Adapter {
      * @param ident Folder ID
      * @param name Foldername
      */
-    createFolder(ident, name) {
+    createFolder(ident, name, icon) {
         return new Promise(resolve => {
             this.getForeignObject(this.namespace + '.' + ident, async (err, obj) => {
+                const com = {
+                    name: name,
+                    write: false,
+                    read: true,
+                }
+                if (icon !== null) com.icon = icon;
                 this.setObjectNotExistsAsync(ident, {
                     type: "channel",
-                    common: {
-                        name: name,
-                        write: false,
-                        read: true,
-                    },
+                    common:com,
                     native: {},
                 })
                 .then(() => {
@@ -382,7 +385,7 @@ class Fritzboxdect extends utils.Adapter {
                         this.log.debug("Single: " + JSON.stringify(result.templatelist.template));
                         ident = result.templatelist.template.identifier.replace(/\s/g, '').replace(/\-1/g, '');
                         dpname = result.templatelist.template.name;
-                        await this.createFolder('TEMP_' + ident, dpname);
+                        await this.createFolder('TEMP_' + ident, dpname, "/icons/template.png");
                         await this.createDataPoint('TEMP_' + ident + '.toogle', 'Toogle aktivieren/deaktivieren', 'button', 'boolean', true);
                         Object.keys(result.templatelist.template).forEach( async (key) => {
                             if (key === "devices") {
@@ -424,7 +427,7 @@ class Fritzboxdect extends utils.Adapter {
                             dpname = result.templatelist.template[n].name;
                             ident = result.templatelist.template[n].identifier.replace(/\s/g, '').replace(/\-1/g, '');
                             dpname = result.templatelist.template[n].name;
-                            db = this.createFolder('TEMP_' + ident, dpname);
+                            db = this.createFolder('TEMP_' + ident, dpname, "/icons/template.png");
                             db = this.createDataPoint('TEMP_' + ident + '.toogle', 'Toogle aktivieren/deaktivieren', 'button', 'boolean', true);
                             this.alltemplates[ident] = true;
                             Object.keys(result.templatelist.template[n]).forEach( async (key) => {
@@ -500,6 +503,7 @@ class Fritzboxdect extends utils.Adapter {
         let bitmask = null;
         let ident   = null;
         let fw_str  = null;
+        let online  = false;
         let sleepT  = this.config.dect_int_sec * 1000;
         let isblind = 0;
         if (dectdata.includes('<group')) dectdata = dectdata.replace(/\<group/g, '<device').replace(/\<\/group/g, '</device')
@@ -522,6 +526,7 @@ class Fritzboxdect extends utils.Adapter {
                             } else {
                                 isblind = 0;
                                 if (bitmask === "335888") isblind = 1;
+                                if (result.devicelist.device.present === 0) online = false;
                                 if (fw_str) {
                                     result.devicelist.device.fwversion = fw_str;
                                     fw_str = null;
@@ -530,7 +535,7 @@ class Fritzboxdect extends utils.Adapter {
                                 if (this.start === 1) {
                                     this.createDP.parse(isblind, result.devicelist.device, 'DECT_' + ident, result.devicelist.device);
                                 } else {
-                                    if (this.allobjects['DECT_' + ident]) {
+                                    if (this.allobjects['DECT_' + ident] && online) {
                                         this.updateDP.parse(this.allobjectsid, isblind, this.strcheck.device, 'DECT_' + ident, result.devicelist.device);
                                     }
                                 }
@@ -543,6 +548,7 @@ class Fritzboxdect extends utils.Adapter {
                                 } else {
                                     isblind = 0;
                                     if (bitmask === "335888") isblind = 1;
+                                    if (result.devicelist.device[n].present === 0) online = false;
                                     if (fw_str) {
                                         result.devicelist.device[n].fwversion = fw_str;
                                         fw_str = null;
@@ -551,9 +557,10 @@ class Fritzboxdect extends utils.Adapter {
                                     if (this.start === 1) {
                                         this.createDP.parse(isblind, result.devicelist.device[n], 'DECT_' + ident, result.devicelist.device[n]);
                                     } else {
-                                        if (this.allobjects['DECT_' + ident]) {
+                                        if (this.allobjects['DECT_' + ident] && online) {
                                             this.updateDP.parse(this.allobjectsid, isblind, this.strcheck.device[n], 'DECT_' + ident, result.devicelist.device[n]);
                                         }
+                                        online = true;
                                     }
                                 }
                             });
@@ -570,6 +577,13 @@ class Fritzboxdect extends utils.Adapter {
             this.startreadallobjects();
             this.check = { username: this.config.username, sid: this.xmlvalue.sid };
             this.Fritzbox("check", this.check);
+            if (this.config.extendForeign) {
+                try {
+                    await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {native: {extendForeign: false}});
+                } catch (e) {
+                    this.log.error("Could not set extendForeign: " + e.message);
+                }
+            }
 //        this.logout = { logout: "logout", sid: this.xmlvalue.sid };
 //        this.Fritzbox("logout", this.logout);
         }
@@ -930,7 +944,7 @@ class Fritzboxdect extends utils.Adapter {
                                   if (k === "hue_index") folder = k + result.colordefaults.hsdefaults.hs[n][k];
                                   if (k === "name") {
                                        foldername = result.colordefaults.hsdefaults.hs[n][k]._;
-                                       this.createFolder(id + "." + folder, foldername);
+                                       this.createFolder(id + "." + folder, foldername, null);
                                   }
                                   if (Array.isArray(result.colordefaults.hsdefaults.hs[n][k])) {
                                        for(const val of result.colordefaults.hsdefaults.hs[n][k]) {
@@ -980,13 +994,31 @@ class Fritzboxdect extends utils.Adapter {
             let secsplit    = id.split('.')[id.split('.').length-3];
             let folderB     = id.split('.')[id.split('.').length-2];
             let deviceId    = await this.getStateAsync(this.namespace + "." + device + ".identifier");
+            const present   = await this.getStateAsync(this.namespace + "." + device + ".present");
+            let actemp      = null;
             deviceId        = encodeurl(deviceId.val);
+
+            if (!present.val) {
+                this.log.warn("Device " + device + " is offline");
+                return;
+            }
 
             this.log.info("SID: " + this.xmlvalue.sid);
             this.log.info("Folder: " + folder);
             this.log.info("Value: " + state.val);
             this.log.info("deviceId: " + deviceId);
             this.log.info("device: " + device);
+            if (lastsplit === "alexapower" ||
+                lastsplit === "alexamode" ||
+                lastsplit === "alexaparty" ||
+                lastsplit === "tsoll") {
+                const nexttemp = await this.getStateAsync(this.namespace + "." + device + ".hkr.nextchange.tchange");
+                const absenk   = await this.getStateAsync(this.namespace + "." + device + ".hkr.absenk");
+                const komfort  = await this.getStateAsync(this.namespace + "." + device + ".hkr.komfort");
+                if (nexttemp.val === absenk.val) actemp = komfort.val * 2;
+                else if (nexttemp.val === komfort.val) actemp = absenk.val * 2;
+                else actemp = absenk.val * 2;
+            }
 
             switch (lastsplit) {
                 case "loadpowerstatic":
@@ -1001,16 +1033,43 @@ class Fritzboxdect extends utils.Adapter {
                     this.loadvalues(2, device + '.devicecolor', 'getcolordefaults&ain=' + deviceId);
                     return;
                     break;
+                case "alexaonoff":
+                    if (state.val) {
+                        dummy = 1;
+                    } else {
+                        dummy = 0;
+                    }
+                    sendstr = 'ain=' + deviceId + '&switchcmd=setsimpleonoff&onoff=' + dummy;
+                    break;
+                case "alexapower":
+                    if (state.val) {
+                        dummy = actemp;
+                    } else {
+                        dummy = 253;
+                    }
+                    sendstr = 'ain=' + deviceId + '&switchcmd=sethkrtsoll&param=' + dummy;
+                    break;
+                case "alexamode":
+                    if (state.val === 0) {
+                        dummy = actemp;
+                    } else {
+                        dummy = 253;
+                    }
+                    sendstr = 'ain=' + deviceId + '&switchcmd=sethkrtsoll&param=' + dummy;
+                    break;
+                case "alexaparty":
+                    if (state.val) {
+                        dummy = 16;
+                    } else {
+                        dummy = actemp;
+                    }
+                    sendstr = 'ain=' + deviceId + '&switchcmd=sethkrtsoll&param=' + dummy;
+                    break;
                 case "tsoll":
                     if (state.val > 7 && state.val < 32) dummy = state.val * 2;
                     else if (state.val === 254 || state.val === 2) dummy = 254;
                     else if (state.val === 0) {
-                        const nexttemp = await this.getStateAsync(this.namespace + "." + device + ".hkr.nextchange.tchange");
-                        const absenk   = await this.getStateAsync(this.namespace + "." + device + ".hkr.absenk");
-                        const komfort  = await this.getStateAsync(this.namespace + "." + device + ".hkr.komfort");
-                        if (nexttemp.val === absenk.val) dummy = komfort.val * 2;
-                        else if (nexttemp.val === komfort.val) dummy = absenk.val * 2;
-                        else dummy = absenk.val * 2;
+                        dummy = actemp;
                     } else if (state.val === 253 || state.val === 1) dummy = 253;
                     else if (typeof state.val === "string") {
                         if (state.val === "true" || state.val.toLowerCase() === "on" || state.val.toLowerCase() === "open") dummy = 254;
@@ -1082,15 +1141,14 @@ class Fritzboxdect extends utils.Adapter {
                 case "levelpercentage":
                     if (state.val >= 0 && state.val <= 100) sendstr = 'ain=' + deviceId + '&switchcmd=setlevelpercentage&level=' + state.val;
                     break;
-                case "levelstring":
-                    if (state.val === 0) {
-                        dummy = "close";
-                    } else if (state.val === 1) {
-                        dummy = "open";
-                    } else {
-                        dummy = "stop";
-                    }
-                    if (dummy !== null) sendstr = 'ain=' + deviceId + '&switchcmd=setblind&target=' + dummy;
+                case "alexastop":
+                    if (state.val) sendstr = 'ain=' + deviceId + '&switchcmd=setblind&target=stop';
+                    break;
+                case "alexaopen":
+                    if (state.val) sendstr = 'ain=' + deviceId + '&switchcmd=setblind&target=open';
+                    break;
+                case "alexaclose":
+                    if (state.val) sendstr = 'ain=' + deviceId + '&switchcmd=setblind&target=close';
                     break;
                 case "levelalexa":
                     if (state.val >= 0 && state.val <= 100) dummy = 100 - state.val;
@@ -1113,16 +1171,12 @@ class Fritzboxdect extends utils.Adapter {
                         sendstr = 'ain=' + encodeurl(dataid.val) + '&switchcmd=setname&name=' + encodeurl(state.val);
                     } else {
                         sendstr = 'ain=' + deviceId + '&switchcmd=setname&name=' + encodeurl(state.val);
-                        obj = {
-                            "type": "channel",
-                            "common": {
-                                "name": state.val,
-                                "write": false,
-                                "read": true
-                            },
-                            "native": {}
-                        };
-                        this.setObject(device, obj);
+                        this.getForeignObject(this.namespace + '.' + device, (err, obj) => {
+                            if (obj) {
+                                obj.common.name = state.val;
+                                this.setObject(device, obj);
+                            }
+                        });
                     }
                     break;
                 case "sendorder":
@@ -1174,7 +1228,7 @@ class Fritzboxdect extends utils.Adapter {
                     sendstr = null;
                     break;
             }
-            this.log.info("Order: " + sendstr);
+            this.log.info("command: " + sendstr);
             if (sendstr !== null) {
                 this.Fritzbox("send", strcheck, sendstr);
             }
