@@ -73,7 +73,7 @@
         "admin": ">=4.0.9"
       }
     ],
-    "installedFrom": "Lucky-ESA/iobroker.fritzboxdect#9b26569cdcab4eb4558c06f8dc51d154cedff24f"
+    "installedFrom": "Lucky-ESA/iobroker.fritzboxdect"
   },
   "encryptedNative": [
     "password"
