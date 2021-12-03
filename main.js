@@ -51,6 +51,7 @@ class Fritzboxdect extends utils.Adapter {
         this.setState("info.connection", false, true);
         this.requestClient = axios.create();
         this.strcheck      = null;
+        this.valuecheck    = null;
         this.start         = null;
         this.createDP      = new createDP(this);
         this.updateDP      = new updateDP(this);
@@ -171,6 +172,7 @@ class Fritzboxdect extends utils.Adapter {
      * @param send param
      */
     async Fritzbox(check, sendpost, sendvalue) {
+        this.log.debug("Fritzbox Parameter check " + check);
         const resid = await this.requestClient
             .post(this.config.ip + '/login_sid.lua?version=2', qs.stringify(sendpost), this.Headers)
             .then((res) => res.data)
@@ -505,15 +507,22 @@ class Fritzboxdect extends utils.Adapter {
         }
 
         let dectdata = resid.data.toString("utf-8").trim();
-        let bitmask = null;
-        let ident   = null;
-        let fw_str  = null;
-        let online  = false;
-        let sleepT  = this.config.dect_int_sec * 1000;
-        let isblind = 0;
+        let bitmask    = null;
+        let ident      = null;
+        let fw_str     = null;
+        let online     = true;
+        let difference = false;
+        let sleepT     = this.config.dect_int_sec * 1000;
+        let isblind    = 0;
         if (dectdata.includes('<group')) dectdata = dectdata.replace(/\<group/g, '<device').replace(/\<\/group/g, '</device')
         this.log.debug(JSON.stringify(dectdata));
-        if (this.isXMLString(dectdata) && (dectdata !== null || dectdata !== undefined)) {
+        if (dectdata !== this.valuecheck || this.start === null) {
+            this.log.debug("Unterschied");
+            difference = true;
+        } else {
+            this.log.debug("Kein Unterschied");
+        }
+        if (this.isXMLString(dectdata) && difference && (dectdata !== null || dectdata !== undefined)) {
             try {
                 parser.parseString(dectdata, async (err, result) => {
                     dectdata = null;
@@ -588,9 +597,13 @@ class Fritzboxdect extends utils.Adapter {
                 }
             }
             this.Fritzboxdevice();
+        } else {
+            await this.sleep(sleepT);
+            if (this.start === 1) this.startreadallobjects();
+            this.Fritzboxdevice();
+        }
 //        this.logout = { logout: "logout", sid: this.xmlvalue.sid };
 //        this.Fritzbox("logout", this.logout);
-        }
     }
 
     /**
