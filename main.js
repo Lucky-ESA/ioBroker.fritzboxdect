@@ -668,7 +668,7 @@ class Fritzboxdect extends utils.Adapter {
         }
         const resid = await this.requestClient
             .get(this.config.ip + '/webservices/homeautoswitch.lua?' + sendvalue + '&sid=' + this.xmlvalue.sid)
-            .then((res) => res.data)
+            .then((res) => res)
             .catch((error) => {
                 this.log.error("GET SEND: " + error);
             });
