@@ -39,6 +39,9 @@ Adapter for Fritzbox DECT Devices
 * HTTPS verwenden
   Verwendung von HTTPS
 
+* Fritzbox Objekte aktualisieren
+  Sollte nach einem Update oder Nemensänderung von Aktoren gesetzt werden
+
 ## Bekannte Geräte
 ## FRITZ!DECT 200/210
 *  Datenpunkte die gesetzt werden können
@@ -47,7 +50,7 @@ Adapter for Fritzbox DECT Devices
    - switch.state: Aktor an/aus
    - temperature.loadtempstatic: Lädt die Temperatur Statistik (Neues Objekt devicestats wird angelegt)
    - name: Name vom Aktor ändern
-   - Für Alexa: Gruppe = switch.state + temperature.celsius um auch die Temperatur ansagen zu lassen
+   - Für Alexa: switch.state + temperature.celsius um auch die Temperatur ansagen zu lassen
 
 ## FRITZ!DECT 301/301 und Comet
 *  Datenpunkte die gesetzt werden können
@@ -62,7 +65,7 @@ Adapter for Fritzbox DECT Devices
    - temperature.loadtempstatic: Lädt die Temperatur Statistik (Neues Objekt devicestats wird angelegt)
      ACHTUNG! open, true, 2 und 254 setzen das HKT auf Max. 28 Grad.
    - name: Name vom Aktor ändern
-   - Für Alexa: Gruppe = hkr.tsoll, temperature.celsius, hkr.alexamode, hkr.alexaparty, hkr.alexapower hkr.boostactive
+   - Für Alexa: hkr.tsoll, temperature.celsius, hkr.alexamode, hkr.alexaparty, hkr.alexapower hkr.boostactive
 
 ## FRITZ!Powerline 546E
 *  Datenpunkte die gesetzt werden können
@@ -84,7 +87,7 @@ Adapter for Fritzbox DECT Devices
 *  Datenpunkte die gesetzt werden können
    - name: Name vom Aktor ändern
    - button.?.name: Name vom Button ändern
-   - Für Alexa: Gruppe = celsius und rel_humidity für die jeweilige Abfrage
+   - Für Alexa: celsius und rel_humidity für die jeweilige Abfrage
 
 ## FRITZ!DECT 500
 *  Datenpunkte die gesetzt werden können
@@ -97,7 +100,7 @@ Adapter for Fritzbox DECT Devices
    - levelcontrol.levelpercentage: Licht dimmen 0% - 100%
    - simpleonoff.state: 0=off 1=on 2=toggle
    - name: Name vom Aktor ändern
-   - Für Alexa: Gruppe = colorcontrol.temperature, colorcontrol.alexaonoff, colorcontrol.huealexa und levelcontrol.levelpercentage
+   - Für Alexa: colorcontrol.temperature, colorcontrol.alexaonoff, colorcontrol.huealexa und levelcontrol.levelpercentage
 
 ## Rollotron 1213
 *  Datenpunkte die gesetzt werden können

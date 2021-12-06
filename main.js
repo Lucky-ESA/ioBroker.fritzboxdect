@@ -93,11 +93,6 @@ class Fritzboxdect extends utils.Adapter {
         this.updateInterval = setInterval(async () => {
             this.start = null;
         }, this.config.dect_int * 60 * 1000);
-        this.sidcheck = setInterval(async () => {
-            this.check = { username: this.config.username, sid: this.xmlvalue.sid };
-            this.Fritzbox("check", this.check);
-            this.log.debug("SID Check: " + this.xmlvalue.sid);
-        }, 15 * 60000);
     }
 
     /**
@@ -596,11 +591,13 @@ class Fritzboxdect extends utils.Adapter {
                     this.log.error("Could not set extendForeign: " + e.message);
                 }
             }
-            this.Fritzboxdevice();
+            this.check = { username: this.config.username, sid: this.xmlvalue.sid };
+            this.Fritzbox("check", this.check);
         } else {
             await this.sleep(sleepT);
             if (this.start === 1) this.startreadallobjects();
-            this.Fritzboxdevice();
+            this.check = { username: this.config.username, sid: this.xmlvalue.sid };
+            this.Fritzbox("check", this.check);
         }
 //        this.logout = { logout: "logout", sid: this.xmlvalue.sid };
 //        this.Fritzbox("logout", this.logout);
@@ -666,12 +663,15 @@ class Fritzboxdect extends utils.Adapter {
             this.Fritzbox("start", this.name, sendvalue);
             return;
         }
+this.log.info("Fritzboxsend vor: ");
+
         const resid = await this.requestClient
             .get(this.config.ip + '/webservices/homeautoswitch.lua?' + sendvalue + '&sid=' + this.xmlvalue.sid)
             .then((res) => res)
             .catch((error) => {
                 this.log.error("GET SEND: " + error);
             });
+this.log.info("Fritzboxsend danach: ");
         try {
             if (resid.status !== 200) {
                 this.log.error('Fritzboxsend: Response from Fritzbox: ' + resid.status);
@@ -1256,7 +1256,7 @@ class Fritzboxdect extends utils.Adapter {
             }
             this.log.info("command: " + sendstr);
             if (sendstr !== null) {
-                this.Fritzboxsend(sendstr);
+                this.Fritzbox("send", strcheck, sendstr);
             }
         } catch (e) {
             this.log.error('Sendcommand: ' + e);
