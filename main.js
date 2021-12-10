@@ -56,7 +56,7 @@ class Fritzboxdect extends utils.Adapter {
         this.createDP      = new createDP(this);
         this.updateDP      = new updateDP(this);
         this.getlist       = new getlist(this);
-        this.xmlvalue      = {sid: 'start',  challenge: '', blocktime: '', pbkf2: '', homeauto: false };
+        this.xmlvalue      = {sid: 'start', blocktime: '', pbkf2: '', homeauto: false };
         this.allobjects    = {};
         this.alltemplates  = {};
         this.allobjectsid  = null;
@@ -93,6 +93,10 @@ class Fritzboxdect extends utils.Adapter {
         this.updateInterval = setInterval(async () => {
             this.start = null;
         }, this.config.dect_int * 60 * 1000);
+        this.updateTemplateInterval = setInterval(async () => {
+            this.check = { username: this.config.username, sid: this.xmlvalue.sid };
+            this.Fritzbox("templates", this.check);
+        }, this.config.temp_int * 60 * 60 * 1000);
     }
 
     /**
@@ -120,7 +124,7 @@ class Fritzboxdect extends utils.Adapter {
                 read: true,
             },
             native: {},
-        })
+        });
 
         await this.setObjectNotExists('DECT_Control.getsubscriptionstate', {
             type: "state",
@@ -132,7 +136,7 @@ class Fritzboxdect extends utils.Adapter {
                 read: true,
             },
             native: {},
-        })
+        });
 
         await this.setObjectNotExists('DECT_Control.sendorder', {
             type: "state",
@@ -144,7 +148,7 @@ class Fritzboxdect extends utils.Adapter {
                 read: true,
             },
             native: {},
-        })
+        });
 
         await this.setObjectNotExists('DECT_Control.cleanup', {
             type: "state",
@@ -156,7 +160,55 @@ class Fritzboxdect extends utils.Adapter {
                 read: true,
             },
             native: {},
-        })
+        });
+
+        await this.setObjectNotExists('DECT_Control.fritzfw', {
+            type: "state",
+            common: {
+                name: "Actual Fritzbox Firmware",
+                type: "mixed",
+                role: "info",
+                write: false,
+                read: true,
+            },
+            native: {},
+        });
+
+        await this.setObjectNotExists('DECT_Control.fritzsid', {
+            type: "state",
+            common: {
+                name: "Actual Fritzbox SID",
+                type: "string",
+                role: "info",
+                write: false,
+                read: true,
+            },
+            native: {},
+        });
+
+        await this.setObjectNotExists('DECT_Control.fritzsidTimestamp', {
+            type: "state",
+            common: {
+                name: "Created Timestamp Fritzbox SID",
+                type: "number",
+                role: "indicator.date",
+                write: false,
+                read: true,
+            },
+            native: {},
+        });
+
+        await this.setObjectNotExists('DECT_Control.fritzsidTime', {
+            type: "state",
+            common: {
+                name: "Created Time Fritzbox SID",
+                type: "number",
+                role: "indicator.date",
+                write: false,
+                read: true,
+            },
+            native: {},
+        });
     }
 
     /**
@@ -181,15 +233,15 @@ class Fritzboxdect extends utils.Adapter {
                     let hashsid = null;
                     const home = (resid.includes('HomeAuto')) ? true : false;
                     const pbkf2 = (result.SessionInfo.Challenge.indexOf("2$") === 0) ? true : false
-                    this.xmlvalue = {sid: result.SessionInfo.SID,  challenge: result.SessionInfo.Challenge, blocktime: result.SessionInfo.BlockTime, pbkf2: pbkf2, homeauto: home  };
+                    this.xmlvalue = {sid: result.SessionInfo.SID, blocktime: parseFloat(result.SessionInfo.BlockTime), pbkf2: pbkf2, homeauto: home  };
                     switch (check) {
                         case "start":
                             this.log.info("Start Adapter.");
                             if (result.SessionInfo.SID === "0000000000000000") {
-                                if (this.xmlvalue.pbkf2) {
-                                    hashsid = await this.create_pbkdf2(this.xmlvalue.challenge, this.config.password);
+                                if (pbkf2) {
+                                    hashsid = await this.create_pbkdf2(result.SessionInfo.Challenge, this.config.password);
                                 } else {
-                                    hashsid = await this.create_md5(this.xmlvalue.challenge, this.config.password);
+                                    hashsid = await this.create_md5(result.SessionInfo.Challenge, this.config.password);
                                 }
                                 hashsid = { username: this.config.username, response: hashsid };
                                 if (this.xmlvalue.blocktime > 0) await this.sleep(this.xmlvalue.blocktime * 1000)
@@ -203,8 +255,17 @@ class Fritzboxdect extends utils.Adapter {
                             if (result.SessionInfo.SID === "0000000000000000") {
                                 this.log.info("Login ivalid! Wrong username or password!");
                                 this.setState("info.connection", false, true);
+                                return;
                             } else {
                                 this.log.info("Login success with SID: " + this.xmlvalue.sid);
+                                const date_ob = new Date();
+                                const date = ("0" + date_ob.getDate()).slice(-2);
+                                const month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+                                const d_format = date + "." + month + "." + date_ob.getFullYear() + " " + date_ob.getHours() + ":" + date_ob.getMinutes() + ":" + date_ob.getSeconds();
+                                const c_time = Math.floor(date_ob / 1000);
+                                await this.createDataPoint('DECT_Control.fritzsid', 'Actual Fritzbox SID', 'info', 'string', false, this.xmlvalue.sid);
+                                await this.createDataPoint('DECT_Control.fritzsidTimestamp', 'Created Timestamp Fritzbox SID', 'info', 'number', false, c_time);
+                                await this.createDataPoint('DECT_Control.fritzsidTime', 'Created Time Fritzbox SID', 'info', 'string', false, d_format);
                                 if (this.xmlvalue.homeauto === false) {
                                     this.log.error("User does not have access to DECT Devices!!");
                                     this.setState("info.connection", false, true);
@@ -213,13 +274,11 @@ class Fritzboxdect extends utils.Adapter {
                                 this.setState("info.connection", true, true);
                                 if (sendvalue !== undefined) {
                                     this.Fritzboxsend(sendvalue);
+                                    return;
                                 } else {
                                     this.Fritzboxdevice();
                                     this.Fritzboxtemplates();
-                                    this.updateTemplateInterval = setInterval(async () => {
-                                        this.Fritzboxtemplates();
-//                                        this.deleteoldobjects();
-                                    }, this.config.temp_int * 60 * 60 * 1000);
+                                    return;
                                 }
                             }
                             break;
@@ -227,19 +286,43 @@ class Fritzboxdect extends utils.Adapter {
                             if (result.SessionInfo.SID === this.xmlvalue.sid) {
                                 this.log.debug("SID is valid");
                                 this.Fritzboxdevice();
+                                return;
                             } else {
                                 if (this.xmlvalue.blocktime > 0) await this.sleep(this.xmlvalue.blocktime * 1000)
                                 this.Fritzbox("start", this.name);
+                                return;
                             }
                             break;
                         case "send":
                             if (result.SessionInfo.SID === this.xmlvalue.sid) {
                                 this.log.debug("SID is valid for send order");
                                 this.Fritzboxsend(sendvalue);
+                                return;
                             } else {
                                 if (this.xmlvalue.blocktime > 0) await this.sleep(this.xmlvalue.blocktime * 1000)
                                 this.Fritzbox("start", this.name, sendvalue);
+                                return;
                             }
+                            break;
+                        case "templates":
+                            if (result.SessionInfo.SID === "0000000000000000") {
+                                this.log.info("Temülate check: SID ivalid!");
+                                this.setState("info.connection", false, true);
+                                return;
+                            } else {
+                                this.log.info("Update Templates!");
+                                this.Fritzboxtemplates();
+                                this.deleteoldobjects();
+                                return;
+                            }
+                            break;
+                        case "dectstate":
+                            this.readsubscriptionstate();
+                            return;
+                            break;
+                        case "cleanup":
+                            this.deleteoldobjects();
+                            return;
                             break;
                         case "logout":
                             if (result.SessionInfo.SID === "0000000000000000") {
@@ -525,6 +608,7 @@ class Fritzboxdect extends utils.Adapter {
                         if (this.start === null) {
                             this.start = 1;
                             this.strcheck = JSON.parse(JSON.stringify(result.devicelist));
+                            this.createDataPoint('DECT_Control.fritzfw', 'Actual Fritzbox Firmware', 'info', 'mixed', false, result.devicelist.fwversion);
                         } else {
                             this.start = 2;
                         }
@@ -599,8 +683,6 @@ class Fritzboxdect extends utils.Adapter {
             this.check = { username: this.config.username, sid: this.xmlvalue.sid };
             this.Fritzbox("check", this.check);
         }
-//        this.logout = { logout: "logout", sid: this.xmlvalue.sid };
-//        this.Fritzbox("logout", this.logout);
     }
 
     /**
@@ -663,15 +745,12 @@ class Fritzboxdect extends utils.Adapter {
             this.Fritzbox("start", this.name, sendvalue);
             return;
         }
-this.log.info("Fritzboxsend vor: ");
-
         const resid = await this.requestClient
             .get(this.config.ip + '/webservices/homeautoswitch.lua?' + sendvalue + '&sid=' + this.xmlvalue.sid)
             .then((res) => res)
             .catch((error) => {
                 this.log.error("GET SEND: " + error);
             });
-this.log.info("Fritzboxsend danach: ");
         try {
             if (resid.status !== 200) {
                 this.log.error('Fritzboxsend: Response from Fritzbox: ' + resid.status);
@@ -682,7 +761,7 @@ this.log.info("Fritzboxsend danach: ");
                 this.Fritzbox("start", this.name, sendvalue);
                 return;
             }
-            this.log.info("Send: " + resid.data); //Wenn 1 dann OK
+            this.log.info("Send: " + resid.data); //Wenn Wert dann OK
         } catch (e) {
             this.log.error('Send error: ' + e);
         }
@@ -817,6 +896,8 @@ this.log.info("Fritzboxsend danach: ");
      */
     onUnload(callback) {
         try {
+            const fritzlogout = { logout: "logout", sid: this.xmlvalue.sid };
+            this.Fritzbox("logout", fritzlogout);
             clearInterval(this.updateInterval);
             clearInterval(this.updateTemplateInterval);
             clearInterval(sidcheck);
@@ -1141,14 +1222,14 @@ this.log.info("Fritzboxsend danach: ");
                     }
                     break;
                 case "temperature":
-		      if (state.val > 6200) dummy = 6500;
-		      else if (state.val > 5600) dummy = 5900;
-		      else if (state.val > 5000) dummy = 5300;
-		      else if (state.val > 4500) dummy = 4700;
-		      else if (state.val > 4000) dummy = 4200;
-		      else if (state.val > 3600) dummy = 3800;
-		      else if (state.val > 3200) dummy = 3400;
-		      else if (state.val > 2850) dummy = 3000;
+		    if (state.val > 6200) dummy = 6500;
+		    else if (state.val > 5600) dummy = 5900;
+		    else if (state.val > 5000) dummy = 5300;
+		    else if (state.val > 4500) dummy = 4700;
+		    else if (state.val > 4000) dummy = 4200;
+		    else if (state.val > 3600) dummy = 3800;
+		    else if (state.val > 3200) dummy = 3400;
+		    else if (state.val > 2850) dummy = 3000;
                     else dummy = 2700;
                     sendstr = 'ain=' + deviceId + '&switchcmd=setcolortemperature&temperature=' + dummy + '&duration=100';
                     break;
@@ -1274,11 +1355,11 @@ this.log.info("Fritzboxsend danach: ");
             const device      = id.split(".")[2];
             const strcheck    = { username: this.config.username, sid: this.xmlvalue.sid };
             if (lastsplit === "getsubscriptionstate") {
-                this.readsubscriptionstate();
+                this.Fritzbox("dectstate", strcheck);
                 return;
             }
             if (lastsplit === "cleanup") {
-                this.deleteoldobjects();
+                this.Fritzbox("cleanup", strcheck);
                 return;
             }
             if (lastsplit === "startulesubscription") {
