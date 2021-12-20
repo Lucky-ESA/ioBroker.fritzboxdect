@@ -202,8 +202,8 @@ class Fritzboxdect extends utils.Adapter {
             type: "state",
             common: {
                 name: "Created Time Fritzbox SID",
-                type: "number",
-                role: "indicator.date",
+                type: "string",
+                role: "info",
                 write: false,
                 read: true,
             },
@@ -727,8 +727,10 @@ class Fritzboxdect extends utils.Adapter {
                 if (isStr.includes(searchStr) || key === "DECT_Control") {
                     this.log.info("This folder will not be deleted: " + key);
                 } else {
-                    this.log.warn("This folder will be deleted: " + key);
-                    this.delForeignObject(key);
+                    if (key !== undefined) {
+                        this.log.warn("This folder will be deleted: " + key);
+                        this.delForeignObject(key);
+                    }
                 }
             });
         }
