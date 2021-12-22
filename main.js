@@ -699,7 +699,7 @@ class Fritzboxdect extends utils.Adapter {
         this.allobjectsid = '';
         let ids = '';
         return new Promise(resolve => {
-            this.getForeignObjects('test.0.*',(err, obj) => {
+            this.getForeignObjects(this.namespace + '.*',(err, obj) => {
                 if (err) {
                     this.log.debug("Read Object: " + err);
                     resolve(this.allobjectsid);
