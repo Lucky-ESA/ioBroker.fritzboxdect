@@ -787,7 +787,9 @@ class Fritzboxdect extends utils.Adapter {
      * @param millisecond
      */
     sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+        return new Promise((resolve) => {
+            this.sleepTimer = setTimeout(resolve, ms);
+        });
     }
 
     /**
@@ -867,26 +869,26 @@ class Fritzboxdect extends utils.Adapter {
         *    Lavendel#c0a8e4
         */
         const colors = {
-            "#ff0000"   : {"dect" : 358, "sat" : [180,112,54], "unm" : [255,255,255], "deb" : ["Rot","Rot hell","Rot heller"] },
-            "#ffa600"   : {"dect" : 35,  "sat" : [214,140,72], "unm" : [252,252,255], "deb" : ["Orange","Orange hell","Orange heller"] }, /*orange*/
-            "#ffff00"   : {"dect" : 52,  "sat" : [153,102,51], "unm" : [255,255,255], "deb" : ["Gelb","Gelb hell","Gelb heller"] }, /*yellow*/
-            "#c7ff1f"   : {"dect" : 92,  "sat" : [123, 79,38], "unm" : [248,250,252], "deb" : ["Limette","Limette hell","Limette heller"] }, /*lime*/
-            "#7efc00"   : {"dect" : 92,  "sat" : [123, 79,38], "unm" : [248,250,252], "deb" : ["Grasgrün","Grasgrün hell","Grasgrün heller"] }, /*grasgreen*/
-            "#00ff00"   : {"dect" : 120, "sat" : [160, 82,38], "unm" : [220,232,242], "deb" : ["Grün","Grün hell","Grün heller"] }, /*green*/
-            "#8eed8e"   : {"dect" : 160, "sat" : [145, 84,41], "unm" : [235,242,248], "deb" : ["Hellgrün","Hellgrün hell","Hellgrün heller"] }, /*lightgreen*/
-            "#3fe0d0"   : {"dect" : 160, "sat" : [145, 84,41], "unm" : [235,242,248], "deb" : ["Türkis","Türkis hell","Türkis heller"] }, /*turpuoise*/
-            "#333333"   : {"dect" : 195, "sat" : [179,118,59], "unm" : [255,255,255], "deb" : ["Cyan","Cyan hell","Cyan heller"] }, /*cyan*/
-            "#add8e5"   : {"dect" : 212, "sat" : [169,110,56], "unm" : [252,252,255], "deb" : ["Hellblau","Hellblau hell","Hellblau heller"] }, /*lightblue*/
-            "#87ceea"   : {"dect" : 212, "sat" : [169,110,56], "unm" : [252,252,255], "deb" : ["Himmelblau","Himmelblau hell","Himmelblau heller"] }, /*skyblue*/
-            "#0000ff"   : {"dect" : 225, "sat" : [204,135,67], "unm" : [255,255,255], "deb" : ["Blau","Blau hell","Blau heller"] }, /*blue*/
-            "#ed82ed"   : {"dect" : 266, "sat" : [169,110,54], "unm" : [250,250,252], "deb" : ["Lila","Lila hell","Lila heller"] }, /*puple*/
-            "#ff00ff"   : {"dect" : 296, "sat" : [140, 92,46], "unm" : [250,252,255], "deb" : ["Magenta","Magenta hell","Magenta heller"] }, /*magenta*/
-            "#eebbcc"   : {"dect" : 296, "sat" : [140, 92,46], "unm" : [250,252,255], "deb" : ["Rosa","Rosa hell","Rosa heller"] }, /*magenta*/
-            "#ffbfcc"   : {"dect" : 335, "sat" : [180,107,51], "unm" : [255,248,250], "deb" : ["Pink","Pink hell","Pink heller"] }  /*pink*/
+            "#ff0000"   : {"dect" : 358, "sat" : 180, "unm" : 255, "deb" : "Rot" },
+            "#ffa600"   : {"dect" : 35,  "sat" : 214, "unm" : 252, "deb" : "Orange" }, 
+            "#ffff00"   : {"dect" : 52,  "sat" : 153, "unm" : 255, "deb" : "Gelb" }, 
+            "#c7ff1f"   : {"dect" : 92,  "sat" : 123, "unm" : 248, "deb" : "Limette" }, 
+            "#7efc00"   : {"dect" : 92,  "sat" : 123, "unm" : 248, "deb" : "Grasgrün" }, 
+            "#00ff00"   : {"dect" : 120, "sat" : 160, "unm" : 220, "deb" : "Grün" }, 
+            "#8eed8e"   : {"dect" : 160, "sat" : 145, "unm" : 235, "deb" : "Hellgrün" }, 
+            "#3fe0d0"   : {"dect" : 160, "sat" : 145, "unm" : 235, "deb" : "Türkis" }, 
+            "#333333"   : {"dect" : 195, "sat" : 179, "unm" : 255, "deb" : "Cyan" }, 
+            "#add8e5"   : {"dect" : 212, "sat" : 169, "unm" : 252, "deb" : "Hellblau" }, 
+            "#87ceea"   : {"dect" : 212, "sat" : 169, "unm" : 252, "deb" : "Himmelblau" }, 
+            "#0000ff"   : {"dect" : 225, "sat" : 204, "unm" : 255, "deb" : "Blau" }, 
+            "#ed82ed"   : {"dect" : 266, "sat" : 169, "unm" : 250, "deb" : "Lila" }, 
+            "#ff00ff"   : {"dect" : 296, "sat" : 140, "unm" : 250, "deb" : "Magenta" }, 
+            "#eebbcc"   : {"dect" : 296, "sat" : 140, "unm" : 250, "deb" : "Rosa" }, 
+            "#ffbfcc"   : {"dect" : 335, "sat" : 180, "unm" : 255, "deb" : "Pink" }
         }
         const col = colors[rgb.toString().toLowerCase()];
         if (typeof col != 'undefined') {
-            return [col.dect, col.sat[0]];
+            return [col.dect, col.sat];
         } else {
             return [358, 180];
         }
@@ -900,9 +902,9 @@ class Fritzboxdect extends utils.Adapter {
         try {
             const fritzlogout = { logout: "logout", sid: this.xmlvalue.sid };
             this.Fritzbox("logout", fritzlogout);
-            clearInterval(this.updateInterval);
-            clearInterval(this.updateTemplateInterval);
-            clearInterval(sidcheck);
+            this.updateInterval && clearInterval(this.updateInterval);
+            this.updateTemplateInterval && clearInterval(this.updateTemplateInterval);
+            this.sleepTimer && clearTimeout(this.sleepTimer);
             callback();
         } catch (e) {
             callback();
@@ -1242,7 +1244,7 @@ class Fritzboxdect extends utils.Adapter {
 
                 case "hue":
                     const sat = await this.getStateAsync(this.namespace + "." + device + ".colorcontrol.saturation");
-                    sendstr = 'ain=' + deviceId + '&switchcmd=setcolor&hue=' + state.val + '&saturation=' + sat + '&duration=100';
+                    sendstr = 'ain=' + deviceId + '&switchcmd=setcolor&hue=' + state.val + '&saturation=' + sat.val + '&duration=100';
                     break;
                 case "level":
                     if (state.val >= 0 && state.val <= 255) sendstr = 'ain=' + deviceId + '&switchcmd=setlevel&level=' + state.val;
