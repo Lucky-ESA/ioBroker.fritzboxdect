@@ -1214,7 +1214,7 @@ class Fritzboxdect extends utils.Adapter {
                                      type: "mixed",
                                      write: true,
                                      read: true,
-                                     min: "-30",
+                                     min: parseFloat("-30"),
                                      max: 255,
                                      unit: "°C"
                                 },
