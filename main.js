@@ -1261,9 +1261,13 @@ class Fritzboxdect extends utils.Adapter {
                 case "alexaclose":
                     if (state.val) sendstr = 'ain=' + deviceId + '&switchcmd=setblind&target=close';
                     break;
-                case "levelalexa":
+                case "alexalevel":
                     if (state.val >= 0 && state.val <= 100) dummy = 100 - state.val;
-                    if (dummy > 0) sendstr = 'ain=' + deviceId + '&switchcmd=setblind&target=' + dummy;
+                    if (state.val >= 0 && state.val <= 100) sendstr = 'ain=' + deviceId + '&switchcmd=setlevelpercentage&level=' + state.val;
+                    break;
+                case "alexavalue":
+                    if (state.val >= 0 && state.val <= 100) dummy = 100 - state.val;
+                    if (state.val >= 0 && state.val <= 100) sendstr = 'ain=' + deviceId + '&switchcmd=setlevelpercentage&level=' + state.val;
                     break;
                 case "name":
                     if (secsplit === "button") {
