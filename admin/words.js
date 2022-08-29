@@ -62,7 +62,7 @@ systemDictionary = {
         pl: "Czas doladowania w minutach",
         "zh-cn": "以分钟为单位的助推器时间",
     },
-    "Openr minutes": {
+    "Open minutes": {
         en: "Window open time in minutes",
         de: "Fenster offen Zeit in Minuten",
         ru: "Время открытия окна в минутах",
