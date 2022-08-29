@@ -1,38 +1,38 @@
 {
-  "_from": "github:Lucky-ESA/ioBroker.fritzboxdect",
-  "_id": "ioBroker.fritzboxdect@0.0.1",
+  "_from": "github:Lucky-ESA/iobroker.fritzboxdect#9a496c340e982e76969285d84089b6844e42eb23",
+  "_id": "iobroker.fritzboxdect@0.0.1",
   "_inBundle": false,
   "_integrity": "",
-  "_location": "/ioBroker.fritzboxdect",
+  "_location": "/iobroker.fritzboxdect",
   "_phantomChildren": {
-    "@types/node": "14.14.9"
+    "follow-redirects": "1.14.9"
   },
   "_requested": {
     "type": "git",
-    "raw": "Lucky-ESA/ioBroker.fritzboxdect",
-    "rawSpec": "Lucky-ESA/ioBroker.fritzboxdect",
-    "saveSpec": "github:Lucky-ESA/ioBroker.fritzboxdect",
+    "raw": "Lucky-ESA/iobroker.fritzboxdect#9a496c340e982e76969285d84089b6844e42eb23",
+    "rawSpec": "Lucky-ESA/iobroker.fritzboxdect#9a496c340e982e76969285d84089b6844e42eb23",
+    "saveSpec": "github:Lucky-ESA/iobroker.fritzboxdect#9a496c340e982e76969285d84089b6844e42eb23",
     "fetchSpec": null,
-    "gitCommittish": "9b26569cdcab4eb4558c06f8dc51d154cedff24f"
+    "gitCommittish": "9a496c340e982e76969285d84089b6844e42eb23"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "github:Lucky-ESA/ioBroker.fritzboxdect",
-  "_spec": "Lucky-ESA/ioBroker.fritzboxdect",
+  "_resolved": "github:Lucky-ESA/iobroker.fritzboxdect#9a496c340e982e76969285d84089b6844e42eb23",
+  "_spec": "Lucky-ESA/iobroker.fritzboxdect#9a496c340e982e76969285d84089b6844e42eb23",
   "_where": "/opt/iobroker",
   "author": {
     "name": "Lucky-ESA",
     "email": "lucky@luckyskills.de"
   },
   "bugs": {
-    "url": "https://github.com/Lucky-ESA/ioBroker.fritzboxdect/issues"
+    "url": "https://github.com/Lucky-ESA/iobroker.fritzboxdect/issues"
   },
   "bundleDependencies": false,
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.0",
-    "axios": "^0.27.1",
+    "axios": "^0.27.2",
     "dgram": "^1.0.1",
     "json-bigint": "^1.0.0",
     "wss": "^3.3.4"
@@ -40,23 +40,23 @@
   "deprecated": false,
   "description": "Adapter for fritzboxdect",
   "devDependencies": {
-    "@iobroker/testing": "^2.5.2",
-    "@types/chai": "^4.2.22",
-    "@types/chai-as-promised": "^7.1.4",
+    "@iobroker/testing": "^3.0.2",
+    "@types/chai": "^4.3.3",
+    "@types/chai-as-promised": "^7.1.5",
     "@types/gulp": "^4.0.9",
-    "@types/mocha": "^9.0.0",
-    "@types/node": "^14.17.21",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^18.7.13",
     "@types/proxyquire": "^1.3.28",
-    "@types/sinon": "^10.0.4",
-    "@types/sinon-chai": "^3.2.5",
-    "axios": "^0.27.1",
-    "chai": "^4.3.4",
+    "@types/sinon": "^10.0.13",
+    "@types/sinon-chai": "^3.2.8",
+	"axios": "^0.27.2",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^7.32.0",
+    "eslint": "^8.23.0",
     "gulp": "^4.0.2",
-    "mocha": "^9.1.2",
+    "mocha": "^9.2.2",
     "proxyquire": "^2.1.3",
-    "sinon": "^11.1.2",
+    "sinon": "^14.0.0",
     "sinon-chai": "^3.7.0",
     "typescript": "~4.4.3"
   },
@@ -69,16 +69,16 @@
     "LICENSE",
     "main.js"
   ],
-  "homepage": "https://github.com/Lucky-ESA/ioBroker.fritzboxdect",
+  "homepage": "https://github.com/Lucky-ESA/iobroker.fritzboxdect",
   "keywords": [
     "test"
   ],
   "license": "MIT",
   "main": "main.js",
-  "name": "ioBroker.fritzboxdect",
+  "name": "iobroker.fritzboxdect",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Lucky-ESA/ioBroker.fritzboxdect.git"
+    "url": "git+https://github.com/Lucky-ESA/iobroker.fritzboxdect.git"
   },
   "scripts": {
     "check": "tsc --noEmit -p tsconfig.check.json",

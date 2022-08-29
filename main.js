@@ -301,6 +301,7 @@ class Fritzboxdect extends utils.Adapter {
                             } else {
                                 if (this.xmlvalue.blocktime > 0) await this.sleep(this.xmlvalue.blocktime * 1000)
                                 this.Fritzbox("start", this.name, sendvalue);
+                                this.log.warn("Start Fritzboxdect:" + this.name);
                                 return;
                             }
                             break;
