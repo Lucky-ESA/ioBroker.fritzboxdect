@@ -573,12 +573,12 @@ class Fritzboxdect extends utils.Adapter {
                 this.log.error("GET Fritzboxdevice: " + error);
             });
 
-        if (resid.status !== 200) {
+        if (resid && resid.status !== 200) {
             this.log.error('Fritzboxdevice: Response from Fritzbox: ' + resid.status);
             await this.sleep(10000);
             this.Fritzbox("start", this.name);
             return;
-        } else if (resid.data === undefined) {
+        } else if (resid === undefined || resid.data === undefined) {
             this.log.error('Fritzboxdevice: Date from Fritzbox are undefined!!');
             await this.sleep(10000);
             this.Fritzbox("start", this.name);
