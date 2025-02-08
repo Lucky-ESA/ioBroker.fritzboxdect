@@ -977,7 +977,7 @@
 
 [Summary](#summary)
 
-- As an example, load messages from the answering machine where this is ller.
+- As an example, load messages from the answering machine, where it is empty.
 - All responses are also written in `States.response` and `States.responseXML`
 
 ```JSON

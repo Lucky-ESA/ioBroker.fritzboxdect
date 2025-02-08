@@ -976,7 +976,7 @@
 
 [Zusammenfassung](#zusammenfassung)
 
-- Als Beispiele Nachrichten vom Anrufbeantworter laden wobei diese ller ist.
+- Als Beispiele Nachrichten vom Anrufbeantworter laden wobei diese leer ist.
 - Alle Antworten werden auch in `States.response` und `States.responseXML` geschrieben
 
 ```JSON
