@@ -39,6 +39,7 @@ class Fritzboxdect extends utils.Adapter {
         this.createAbsence = helper.createAbsence;
         this.createAbsenceFolder = helper.createAbsenceFolder;
         this.createStateTR064 = helper.createStateTR064;
+        this.createStateEnergyTR064 = helper.createStateEnergyTR064;
         this.sleepTimer = null;
         this.dect_device = {};
         this.clients = {};
@@ -181,6 +182,8 @@ class Fritzboxdect extends utils.Adapter {
             let login;
             this.log.info(`Create TR-064 States folder.`);
             await this.createStateTR064(dev);
+            // TODO Fiber Box have no Energymonitoring
+            await this.createStateEnergyTR064(dev);
             login = await dev.apiFritz.login();
             if (login === "BLOCK") {
                 login = await dev.apiFritz.login();
