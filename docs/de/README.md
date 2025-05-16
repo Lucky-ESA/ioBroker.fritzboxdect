@@ -19,6 +19,7 @@
     - [Nur lesen States](#readonly-states)
     - [DECT 100](#dect-100)
     - [DECT 200 und 210](#dect-200---210)
+    - [DECT 250](#dect-250)
     - [DECT 300, 301, 302 und Comet](#dect-300-301-302-und-comet)
     - [DECT 350](#dect-350)
     - [DECT 400](#dect-400)
@@ -81,7 +82,6 @@
 - `Name` Name
 - `MAC` MAC Adresse
 - `Offline` Zeit die ein Telefon Offline sein muss um als Offline gesetzt zu werden
-
 - `Intervall für den Status der MAC-Adressen in Minuten` Intervall für den Status der MAC-Adressen in Minuten
 
 ![instance_5.png](img/instance_5.png)
@@ -137,6 +137,7 @@
 - `functionbitmask`: Bitmaske der Geräte-Funktionsklassen, beginnen mit Bit 0, es können mehrere Bits gesetzt sein
     ```
         Bit 0: HAN-FUN Gerät
+        Bit 1: Stromzähler
         Bit 2: Licht/Lampe
         Bit 4: Alarm-Sensor
         Bit 5: AVM Button
@@ -207,7 +208,6 @@
     - `name`: Name vom Aktor ändern
 
 - States die gesetzt werden können wenn Temperatur verfügbar
-
     - `temperature.getTemperatureStatistic`: Lädt die Temperatur Statistik (Neues Objekt devicestats wird angelegt) [Siehe](#temperature-statistic)
 
 ![States_dect_100.png](img/States_dect_100.png)
@@ -237,6 +237,23 @@
 
 ![States_dect_200_1.png](img/States_dect_200_1.png)</br>
 ![States_dect_200_2.png](img/States_dect_200_2.png)
+
+### DECT 250
+
+[Zusammenfassung](#zusammenfassung)
+
+- States die gesetzt werden können
+
+    - `powermeter.getStatistic`: Lädt die Power Statistik (Neues Objekt devicestats wird angelegt) [Siehe](#power-statistic)
+    - `name`: Name vom Aktor ändern
+
+- Readonly States
+    - `powermeter.energy`: Wert in 1.0 Wh (absoluter Verbrauch seit Inbetriebnahme)
+    - `powermeter.power`: Wert in 1 W (aktuelle Leistung, wird etwa alle 2 Minuten aktualisiert)
+    - `powermeter.voltage`: Wert in 1 V (aktuelle Spannung, wird etwa alle 2 Minuten aktualisiert)
+
+![States_dect_250.png](img/States_dect_250.png)</br>
+![States_dect_250_1.png](img/States_dect_250_1.png)
 
 ### DECT 300, 301, 302 und Comet
 
@@ -402,7 +419,6 @@
 ```
 
 - Readonly States
-
     - `colorcontrol.current_mode`: 1(HueSaturation), 4 (Farbtemperatur) oder ""(leer → unbekannt)
     - `colorcontrol.fullcolorsupport`: Lampe unterstützt setunmappedcolor, also von den colordefaults abweichende
       HueSaturation-Werte ja(true)/nein(false)
@@ -484,7 +500,6 @@
 [Zusammenfassung](#zusammenfassung)
 
 - States die gesetzt werden können
-
     - `name`: Name vom Aktor ändern
     - Alle States der Aktoren die der Gruppe hinzugefügt wurden
 
@@ -533,7 +548,6 @@
 [Zusammenfassung](#zusammenfassung)
 
 - States die gesetzt werden können
-
     - `active`: false/true-Flag, Trigger aktiviert(true) oder deaktiviert(false)
     - `name`: Name vom Aktor ändern
 

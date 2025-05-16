@@ -30,6 +30,7 @@ Also supports TR-064 protocol with call monitoring, recent calls and phonebook.
 - FRITZ!DECT Repeater 100 with temperature
 - FRITZ!DECT 200
 - FRITZ!DECT 210
+- FRITZ!DECT 250
 - FRITZ!DECT 300
 - FRITZ!DECT 301
 - FRITZ!DECT 302

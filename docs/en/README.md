@@ -19,6 +19,7 @@
     - [States readonly](#readonly-states)
     - [DECT 100](#dect-100)
     - [DECT 200 und 210](#dect-200---210)
+    - [DECT 250](#dect-250)
     - [DECT 300, 301, 302 und Comet](#dect-300-301-302-und-comet)
     - [DECT 350](#dect-350)
     - [DECT 400](#dect-400)
@@ -138,6 +139,7 @@
 - `functionbitmask`: Bit mask of the device function classes, start with bit 0, several bits can be set
     ```
         Bit 0: HAN-FUN device
+        Bit 1: Electricity meter
         Bit 2: Light/Lamp
         Bit 4: Alarm sensor
         Bit 5: AVM button
@@ -204,9 +206,7 @@
 [Summary](#summary)
 
 - States that can be set
-
     - `name`: Change name of actor
-
 - States that can be set if temperature available
 
     - `temperature.getTemperatureStatistic`: Loads the temperature statistics (new object devicestats is created) [Please refer](#temperature-statistic)
@@ -239,11 +239,28 @@
 ![States_dect_200_1.png](img/States_dect_200_1.png)</br>
 ![States_dect_200_2.png](img/States_dect_200_2.png)
 
+### DECT 250
+
+[Summary](#summary)
+
+- States that can be set
+
+    - `powermeter.getStatistic`: Loads the power statistics (new devicestats object is created) [Please refer](#power-statistic)
+    - `name`: Change name of actor
+
+- Readonly States
+    - `powermeter.energy`: Value in 1.0 Wh (absolute consumption since commissioning)
+    - `powermeter.power`: Value in 1 W (current power, updated approximately every 2 minutes)
+    - `powermeter.voltage`: Value in 1 V (current voltage, updated approximately every 2 minutes)
+
+![States_dect_250.png](img/States_dect_250.png)</br>
+![States_dect_250_1.png](img/States_dect_250_1.png)
+
 ### DECT 300, 301, 302 und Comet
 
 [Summary](#summary)
 
-- Datenpunkte die gesetzt werden können
+- States that can be set
 
     - `hkr.boostactive`: Activate booster heating - time is taken from the instance config
     - `hkr.boostactiveendtime`: Activate booster heating - Enter booster time in minutes and not greater than 24 hours
@@ -403,7 +420,6 @@
 ```
 
 - Readonly States
-
     - `colorcontrol.current_mode`: 1(HueSaturation), 4 (color temperature) or ""(empty → unknown)
     - `colorcontrol.fullcolorsupport`: Lamp supports setunmappedcolor, i.e. colors that differ from the colordefaults
       HueSaturation values ​​yes(true)/no(false)
@@ -486,7 +502,6 @@
 [Summary](#summary)
 
 - States that can be set
-
     - `name`: Change the name of the actuator
     - All states of the actors that were added to the group
 
@@ -535,7 +550,6 @@
 [Summary](#summary)
 
 - States that can be set
-
     - `active`: false/true flag, trigger activated(true) or deactivated(false)
     - `name`: Change the name of the actuator
 
