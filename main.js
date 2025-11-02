@@ -1352,10 +1352,10 @@ class Fritzboxdect extends utils.Adapter {
     sleep(ms) {
         return new Promise((resolve, reject) => {
             if (!ms || typeof ms !== "number" || ms < 1) {
-                reject(false);
+                reject;
             }
             this.sleepTimer = this.setTimeout(() => {
-                resolve(true);
+                resolve;
             }, ms);
         });
     }
