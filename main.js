@@ -222,10 +222,12 @@ class Fritzboxdect extends utils.Adapter {
                 );
                 if (devices && devices.devicelist && devices.devicelist.device) {
                     this.log.info(`DECT Datapoints for device ${dev.ip} are created/updated`);
+                    this.log.info(`DEVICELIST ${JSON.stringify(devices.devicelist.device)}`);
                     await this.createChannels(dev, devices.devicelist.device, constants, "DECT");
                 }
                 if (devices && devices.devicelist && devices.devicelist.group) {
                     this.log.info(`Group Datapoints for device ${dev.ip} are created/updated`);
+                    this.log.info(`DEVICEGROUP ${JSON.stringify(devices.devicelist.group)}`);
                     await this.createChannels(dev, devices.devicelist.group, constants, "GROUP");
                 }
                 const template = await dev.apiFritz.fritzRequest(
@@ -235,6 +237,7 @@ class Fritzboxdect extends utils.Adapter {
                 );
                 if (template && template.templatelist && template.templatelist.template) {
                     this.log.info(`Template Datapoints for device ${dev.ip} are created/updated`);
+                    this.log.info(`TEMPLATE ${JSON.stringify(template.templatelist.template)}`);
                     await this.createChannels(dev, template.templatelist.template, constants, "TEMPLATE");
                 }
                 const trigger = await dev.apiFritz.fritzRequest(
@@ -244,6 +247,7 @@ class Fritzboxdect extends utils.Adapter {
                 );
                 if (trigger && trigger.triggerlist && trigger.triggerlist.trigger) {
                     this.log.info(`Trigger Datapoints for device ${dev.ip} are created/updated`);
+                    this.log.info(`TRIGGER ${JSON.stringify(trigger.triggerlist.trigger)}`);
                     await this.createChannels(dev, trigger.triggerlist.trigger, constants, "TRIGGER");
                 }
                 await this.setState("info.connection", { val: true, ack: true });
@@ -391,7 +395,11 @@ class Fritzboxdect extends utils.Adapter {
         const channels_array = channels.map(entry => entry._id);
         this.log.debug(`All channels ${JSON.stringify(channels_array)}`);
         this.log.debug(`DP ${dp}`);
-        this.clients[dp].updateChannel(channels_array);
+        if (this.clients[dp]) {
+            this.clients[dp].updateChannel(channels_array);
+        } else {
+            this.log.error(`Cannot found ${dp}. Please restart adapter!`);
+        }
     }
 
     /**
@@ -1350,7 +1358,7 @@ class Fritzboxdect extends utils.Adapter {
      * @param {number} ms
      */
     sleep(ms) {
-        return new Promise((resolve, _) => {
+        return new Promise(resolve => {
             this.sleepTimer = this.setTimeout(() => {
                 resolve(true);
             }, ms);
