@@ -1358,7 +1358,7 @@ class Fritzboxdect extends utils.Adapter {
      * @param {number} ms
      */
     sleep(ms) {
-        // @ts-ignore
+        // @ts-expect-error - Nothing
         return new Promise(resolve => {
             this.sleepTimer = this.setTimeout(() => {
                 resolve;
