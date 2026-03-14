@@ -184,9 +184,9 @@ class Fritzboxdect extends utils.Adapter {
             await this.createStateTR064(dev);
             // TODO Fiber Box have no Energymonitoring
             await this.createStateEnergyTR064(dev);
-            login = await dev.apiFritz.login();
+            login = await dev.apiFritz.login(true);
             if (login === "BLOCK") {
-                login = await dev.apiFritz.login();
+                login = await dev.apiFritz.login(true);
             }
             if (login) {
                 this.log.info(`Connected to Fritzbox ${dev.ip} - Create device!`);
@@ -1358,6 +1358,7 @@ class Fritzboxdect extends utils.Adapter {
      * @param {number} ms
      */
     sleep(ms) {
+        // @ts-ignore
         return new Promise(resolve => {
             this.sleepTimer = this.setTimeout(() => {
                 resolve;
