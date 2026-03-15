@@ -180,17 +180,17 @@ class Fritzboxdect extends utils.Adapter {
             }
             dev.status = true;
             let login;
-            this.log.info(`Create TR-064 States folder.`);
+            this.log.info(`${dev.ip} - Create TR-064 States folder.`);
             await this.createStateTR064(dev);
             // TODO Fiber Box have no Energymonitoring
             await this.createStateEnergyTR064(dev);
-            login = await dev.apiFritz.login(true);
+            await this.createDevice(dev);
+            login = await dev.apiFritz.login();
             if (login === "BLOCK") {
-                login = await dev.apiFritz.login(true);
+                login = await dev.apiFritz.login();
             }
             if (login) {
                 this.log.info(`Connected to Fritzbox ${dev.ip} - Create device!`);
-                await this.createDevice(dev, login);
                 if (dev.call) {
                     this.log.info(`Create Callmonitor folder.`);
                     await this.createCallmonitor(dev);
