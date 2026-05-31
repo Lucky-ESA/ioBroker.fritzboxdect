@@ -7,11 +7,11 @@ updates:
     - package-ecosystem: "npm"
       schedule:
           interval: "cron"
-          cronjob: "10 3 * * 3"
+          cronjob: "7 3 * * 3"
           timezone: "Europe/Berlin"
       open-pull-requests-limit: 15
       assignees:
-          - "iobroker-community-adapters"
+          - "Lucky-ESA"
       versioning-strategy: "increase"
       cooldown:
           default-days: 7
@@ -30,4 +30,4 @@ updates:
           timezone: "Europe/Berlin"
       open-pull-requests-limit: 15
       assignees:
-          - "iobroker-community-adapters"
+          - "Lucky-ESA"
