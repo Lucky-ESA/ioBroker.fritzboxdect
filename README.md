@@ -19,9 +19,9 @@ Also supports TR-064 protocol with call monitoring, recent calls and phonebook.
 
 ## Required
 
-- Node 20, 22 or 24
+- Node 22 or 24
 - JS-Controller >= 6.0.11
-- Admin >= 7.7.22
+- Admin >= 7.8.23
 - Fritz OS >= 7.0
 
 ## Known devices
