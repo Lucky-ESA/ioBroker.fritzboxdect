@@ -26,7 +26,7 @@
         "axios": "^1.13.6",
         "entities": "^8.0.0",
         "https": "^1.0.0",
-        "node-html-parser": "^7.0.2",
+        "node-html-parser": "^8.0.4",
         "qrcode": "^1.5.4",
         "xml2js": "^0.6.2"
     },
